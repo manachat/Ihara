@@ -3,10 +3,14 @@ package ru.hse.edu.vafilonov.Ihara;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 
 public class Controller {
     @FXML
@@ -14,33 +18,27 @@ public class Controller {
 
     private final int nodeRadius = 5;
 
-    private List<Node> nodes = new ArrayList<>();
+    @FXML
+    private AnchorPane workingField;
 
     @FXML
-    private void mainCanvasClickHandler(MouseEvent e){
+    private void workingFieldClickHandler(MouseEvent e){
+        double x = e.getX();
+        double y = e.getY();
+        Circle c = new Circle(x, y, nodeRadius, Color.RED);
 
-        GraphicsContext canvasContext = mainCanvas.getGraphicsContext2D();
-        double mouseX = e.getX();
-        double mouseY = e.getY();
-        canvasContext.setFill(Color.RED);
-        for (Node n : nodes){
-            double dist = n.getDistanceTo(mouseX, mouseY);
-            if (dist < 2*nodeRadius){
-                if (dist < nodeRadius){
-                    System.out.println("Point (" + n.getX() + "," + n.getY() + ") clicked.");
-                    canvasContext.setStroke(Color.BLACK);
-                    nodeClickHandler(n, canvasContext);
+        c.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event){
+                if (event.getButton() == MouseButton.SECONDARY){
+                    workingField.getChildren().remove(event.getTarget());
                 }
-                return;
+
+                event.consume();
             }
-        }
+        });
 
-        nodes.add(new Node(mouseX, mouseY, nodeRadius));
-
-        canvasContext.fillOval(mouseX - nodeRadius, mouseY - nodeRadius, 2*nodeRadius, 2*nodeRadius);
+        workingField.getChildren().add(c);
     }
 
-    private void nodeClickHandler(Node node, GraphicsContext gc){
-        gc.strokeOval(node.getX() - nodeRadius, node.getY() - nodeRadius, 2*nodeRadius, 2*nodeRadius);
-    }
 }
