@@ -1,10 +1,15 @@
 package ru.hse.edu.vafilonov.Ihara;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainModel {
-    Node[][] adjacencyMatrix = new Node[10][10];
+    GraphNode[][] adjacencyMatrix = new GraphNode[10][10];
     int matrixSize = 0;
 
-    //public void addConnection()
+    private List<AbstractGraphElement> allGraphElements = new ArrayList<>(10);
 
-
+    public void addElement(AbstractGraphElement el){
+        allGraphElements.add(el);
+    }
 }
