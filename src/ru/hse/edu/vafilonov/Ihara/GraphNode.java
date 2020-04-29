@@ -1,17 +1,18 @@
 package ru.hse.edu.vafilonov.Ihara;
 
 import javafx.scene.Node;
+import javafx.scene.shape.Shape;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GraphNode extends AbstractGraphElement {
-    private List<AbstractGraphElement> connections = new ArrayList<>();
+    private List<GraphEdge> connections = new ArrayList<>();
 
-    public GraphNode(Node rep){
+    public GraphNode(Figure rep, GraphModel graph){
         representation = rep;
+        this.graph = graph;
     }
-
 
     @Override
     public void deleteElement(){ //по идее должен вызываться из модели
@@ -23,7 +24,7 @@ public class GraphNode extends AbstractGraphElement {
 
     @Override
     public void connect(AbstractGraphElement el){
-        connections.add(el);
+        connections.add((GraphEdge)el);
     }
 
     @Override

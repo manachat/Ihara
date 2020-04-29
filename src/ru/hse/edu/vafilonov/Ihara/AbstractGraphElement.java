@@ -1,16 +1,19 @@
 package ru.hse.edu.vafilonov.Ihara;
 
 import javafx.scene.Node;
+import javafx.scene.shape.Shape;
 
 public abstract class AbstractGraphElement {
+
+    protected GraphModel graph;
 
     /**
      * Connects element with graphical representation
      */
-    protected Node representation;
+    protected Figure representation;
 
     /**
-     * Removes all connections to other elements and notifys them about deletion
+     * Removes all connections to other elements and notifies them about deletion
      */
     public abstract void deleteElement();
 
@@ -19,11 +22,11 @@ public abstract class AbstractGraphElement {
      * Connects current element to other
      * @param el element to be connected
      */
-    public abstract void connect(AbstractGraphElement el);
+    protected abstract void connect(AbstractGraphElement el);
 
     /**
      * Disconnects element
      * @param el element that should be disconnected
      */
-    public abstract void disconnect(AbstractGraphElement el);
+    protected abstract void disconnect(AbstractGraphElement el);
 }

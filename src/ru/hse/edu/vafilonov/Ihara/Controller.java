@@ -7,15 +7,13 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 
-public class Controller {
+public class Controller extends BaseController{
     @FXML
     private Canvas mainCanvas;
-
-    private final int nodeRadius = 5;
-    private final MainModel model = new MainModel();
-
     @FXML
     private AnchorPane workingField;
 
@@ -28,29 +26,51 @@ public class Controller {
         double x = e.getX();
         double y = e.getY();
 
-        addNewCircle(x, y);
+        createNode(x, y);
     }
 
-    private void addNewCircle(double x, double y){
-        Circle c = new Circle(x, y, nodeRadius, Color.RED);
-        GraphNode graphNode = new GraphNode(c);
-        model.addElement(graphNode);
+    private boolean nodeSelected = false;
+    private GraphNode selectedNode;
 
-        c.setOnMouseClicked(new EventHandler<MouseEvent>() {
+    private int nodeRadius = 5;
+    private Paint nodeColor = Color.RED;
+
+    private GraphModel model = new GraphModel(workingField);
+
+    private void createNode(double x, double y){
+        Round round = new Round(x, y, nodeRadius, nodeColor);
+        GraphNode graphNode = new GraphNode(round, model);
+        round.getCircle().setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event){
                 //delete node
                 if (event.getButton() == MouseButton.SECONDARY){
-                    workingField.getChildren().remove(event.getTarget());
+                    model.removeNode(graphNode);
                 }//select node
                 else{
+                    if (!nodeSelected) {
+                        selectedNode = graphNode;
+                        ((Circle)event.getTarget()).setStroke(Color.YELLOW);
+                        nodeSelected = true;
+                    }
+                    else {
+                        if (selectedNode == graphNode){
 
+                        }
+                        else {
+                            GraphNode origin = selectedNode;
+                            GraphNode tail = graphNode;
+                            Arc arc = new Arc(1, 2, 3, 4);
+                            GraphEdge edge = new GraphEdge(arc, model, origin, tail);
+                            nodeSelected = false;
+                        }
+                    }
                 }
                 event.consume();
             }
         });
 
-        workingField.getChildren().add(c);
+        model.addNode(graphNode);
     }
 
 }
