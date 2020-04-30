@@ -5,12 +5,16 @@ import javafx.scene.shape.Shape;
 
 public abstract class AbstractGraphElement {
 
+    protected static int nextHash = 0;
+
+    protected int hash;
+
     protected GraphModel graph;
 
-    /**
-     * Connects element with graphical representation
-     */
-    protected Figure representation;
+    public AbstractGraphElement(){
+        hash = nextHash;
+        nextHash++;
+    }
 
     /**
      * Removes all connections to other elements and notifies them about deletion
@@ -18,19 +22,9 @@ public abstract class AbstractGraphElement {
     public abstract void deleteElement();
 
 
-    /**
-     * Connects current element to other
-     * @param el element to be connected
-     */
-    protected abstract void connect(AbstractGraphElement el);
 
-    /**
-     * Disconnects element
-     * @param el element that should be disconnected
-     */
-    protected abstract void disconnect(AbstractGraphElement el);
-
-    public Figure getRepresentation(){
-        return representation;
+    @Override
+    public int hashCode() {
+        return hash;
     }
 }
