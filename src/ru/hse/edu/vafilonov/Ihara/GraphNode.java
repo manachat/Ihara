@@ -4,14 +4,19 @@ import javafx.scene.Node;
 import javafx.scene.shape.Shape;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class GraphNode extends AbstractGraphElement {
-    private List<GraphEdge> connections = new ArrayList<>();
+    private final List<GraphEdge> connections = new ArrayList<>();
 
     public GraphNode(Figure rep, GraphModel graph){
         representation = rep;
         this.graph = graph;
+    }
+
+    public List<GraphEdge> getConnections(){
+        return connections;
     }
 
     @Override
@@ -30,6 +35,10 @@ public class GraphNode extends AbstractGraphElement {
     @Override
     public void disconnect(AbstractGraphElement el){
         connections.remove(el);
+    }
+
+    static boolean connected(GraphNode a, GraphNode b){
+        List<GraphEdge>
     }
 
 }

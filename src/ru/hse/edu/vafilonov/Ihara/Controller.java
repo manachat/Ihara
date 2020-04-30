@@ -54,13 +54,15 @@ public class Controller extends BaseController{
                         nodeSelected = true;
                     }
                     else {
-                        if (selectedNode == graphNode){
-
+                        if (selectedNode == graphNode){ //remove selection
+                            ((Circle)event.getTarget()).setStroke(nodeColor);
                         }
-                        else {
+                        else { //create node
                             GraphNode origin = selectedNode;
                             GraphNode tail = graphNode;
-                            Arc arc = new Arc(1, 2, 3, 4);
+                            Circle oCircle = (Circle)origin.getRepresentation().getComponents().get(0);
+                            Circle tCircle = (Circle)tail.getRepresentation().getComponents().get(0);
+                            Arc arc = new Arc(oCircle.getCenterX(), oCircle.getCenterY(), tCircle.getCenterX(), tCircle.getCenterY());
                             GraphEdge edge = new GraphEdge(arc, model, origin, tail);
                             nodeSelected = false;
                         }

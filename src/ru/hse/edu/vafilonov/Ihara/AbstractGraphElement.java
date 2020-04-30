@@ -29,4 +29,8 @@ public abstract class AbstractGraphElement {
      * @param el element that should be disconnected
      */
     protected abstract void disconnect(AbstractGraphElement el);
+
+    public Figure getRepresentation(){
+        return representation;
+    }
 }

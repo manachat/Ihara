@@ -24,6 +24,8 @@ public class GraphEdge extends AbstractGraphElement {
 
     @Override
     public void connect(AbstractGraphElement el) {
+
+        //TODO а зачем он?
         if (tail != null && origin != null){
             throw new IllegalArgumentException(); //TODO: доделать
         }
@@ -39,5 +41,13 @@ public class GraphEdge extends AbstractGraphElement {
     @Override
     public void disconnect(AbstractGraphElement el){
 
+    }
+
+    public GraphNode getOrigin() {
+        return origin;
+    }
+
+    public GraphNode getTail() {
+        return tail;
     }
 }
