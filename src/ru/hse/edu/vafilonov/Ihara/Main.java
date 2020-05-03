@@ -18,7 +18,7 @@ public class Main extends Application {
         Parent root = loader.load();
 
         primaryStage.setTitle("Ihara calculator(name temporary)");
-        Scene scene = new Scene(root, 1000, 400);
+        Scene scene = new Scene(root, 1200, 700);
         primaryStage.setScene(scene);
         BaseController.setScene(scene);
 

@@ -65,7 +65,7 @@ public class Controller extends BaseController{
                                     @Override
                                     public void handle(MouseEvent mouseEvent) {
                                         if (mouseEvent.getButton() == MouseButton.PRIMARY) { //set weight
-                                            //TODO implement, dialog maybe
+                                            //TODO implement, dialog with weight maybe
                                         }
                                         else if (mouseEvent.getButton() == MouseButton.SECONDARY) { //delete
                                             deleteEdge(graphEdge); // TODO CLOSURE
@@ -79,12 +79,13 @@ public class Controller extends BaseController{
                                 model.addEdge(graphEdge);
                                 edgemap.put(graphEdge, arc);
                             }
-                            else{
+                            else{ //connection already exists
                                 //TODO alert dialog
                             }
-                            ((Circle)nodemap.get(selectedNode)).setStroke(null);
-                            nodeSelected = false;
                         }
+                        ((Circle)nodemap.get(selectedNode)).setStroke(null);
+                        nodeSelected = false;
+
                     }
                 }
                 event.consume();
@@ -100,7 +101,10 @@ public class Controller extends BaseController{
     private boolean nodeSelected = false;
     private GraphNode selectedNode;
 
-    private double nodeRadius = 7.5;
+    private final double nodeRadius = 7.5;
+    private final double arrowWing = 10;
+    private final double cosWing = Math.cos(Math.PI / 12);
+    private final double sinWing = Math.sin(Math.PI / 12);
     private Paint nodeColor = Color.RED;
 
     HashMap<GraphNode, Shape> nodemap = new HashMap<>();
@@ -140,13 +144,23 @@ public class Controller extends BaseController{
         double length = Math.sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
         vectorX /= length;
         vectorY /= length;
-        x1 += nodeRadius * vectorX;
-        y1 += nodeRadius * vectorY;
-        x2 -= nodeRadius * vectorX;
-        y2 -= nodeRadius * vectorY;
+        x1 += (nodeRadius + 2) * vectorX;
+        y1 += (nodeRadius + 2) * vectorY;
+        x2 -= (nodeRadius + 2) * vectorX;
+        y2 -= (nodeRadius + 2) * vectorY;
         Line mainLine = new Line(x1, y1, x2, y2);
         mainLine.setStrokeWidth(2.5);
-        return mainLine;
+        double xWproj = -arrowWing * vectorX;
+        double yWproj = -arrowWing * vectorY;
+        double x = xWproj * cosWing - yWproj * sinWing;
+        double y = xWproj * sinWing + yWproj * cosWing;
+        Line firstwing = new Line(x2, y2, x2 + x, y2 + y);
+        x = xWproj * cosWing + yWproj * sinWing;
+        y = -xWproj * sinWing + yWproj * cosWing;
+        Line secondwing = new Line(x2, y2, x2 + x, y2 + y);
+        firstwing.setStrokeWidth(2);
+        secondwing.setStrokeWidth(2);
+        return Shape.union(mainLine, Shape.union(firstwing, secondwing));
     }
 
 }
