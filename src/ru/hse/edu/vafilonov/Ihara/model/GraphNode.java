@@ -1,4 +1,4 @@
-package ru.hse.edu.vafilonov.Ihara;
+package ru.hse.edu.vafilonov.Ihara.model;
 
 import javafx.scene.Node;
 import javafx.scene.shape.Shape;

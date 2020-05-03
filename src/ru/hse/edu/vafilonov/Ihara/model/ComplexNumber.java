@@ -1,8 +1,12 @@
-package ru.hse.edu.vafilonov.Ihara;
+package ru.hse.edu.vafilonov.Ihara.model;
 
 public final class ComplexNumber extends Number{
     private final double re;
     private final double im;
+
+    public static final ComplexNumber addId = new ComplexNumber(0, 0);
+
+    public static final ComplexNumber multId = new ComplexNumber(1, 0);
 
     public ComplexNumber(double re, double im){
         this.re = re;
@@ -14,12 +18,6 @@ public final class ComplexNumber extends Number{
         im = 0.0;
     }
 
-    public ComplexNumber plus(ComplexNumber arg){
-        double x = re + arg.re;
-        double y = im + arg.im;
-        return new ComplexNumber(x, y);
-    }
-
     public double modulus(){
         return Math.sqrt(re*re + re*re);
     }
@@ -29,30 +27,37 @@ public final class ComplexNumber extends Number{
         return squared ? r2 : Math.sqrt(r2);
     }
 
-    public ComplexNumber minus(ComplexNumber arg){
-        double x = re - arg.re;
-        double y = im - arg.im;
+    public static ComplexNumber sum(ComplexNumber a, ComplexNumber b){
+        double x = a.re + b.re;
+        double y = a.im + b.im;
         return new ComplexNumber(x, y);
     }
 
-    public ComplexNumber mult(ComplexNumber arg){
-        double x = re*arg.re - im*arg.im;
-        double y = re*arg.im + im*arg.re;
+    public static ComplexNumber multiply(ComplexNumber a, ComplexNumber b){
+        double x = a.re*b.re - a.im*b.im;
+        double y = a.re*b.im + a.im*b.re;
         return new ComplexNumber(x, y);
     }
 
-    /**
-     * WARNING DiVByZero not handled
-     * @param arg
-     * @return
-     */
-    public ComplexNumber div(ComplexNumber arg){
+    public ComplexNumber getAddInverse(){
+        return new ComplexNumber(-re, - im);
+    }
+
+    public ComplexNumber getMultInverse(){
         ComplexNumber conjugate = new ComplexNumber(re, -im);
-        ComplexNumber numerator = mult(conjugate);
-        double denominator = modulus(true);
-        return new ComplexNumber(numerator.re / denominator, numerator.im / denominator);
+        double r = modulus(true);
+        double x = conjugate.re / r;
+        double y = conjugate.im / r;
+        return new ComplexNumber(x, y);
     }
 
+    public double getRe() {
+        return re;
+    }
+
+    public double getIm() {
+        return im;
+    }
 
     @Override
     public int intValue() {

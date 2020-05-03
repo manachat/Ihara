@@ -9,21 +9,23 @@ import javafx.stage.Stage;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
+import ru.hse.edu.vafilonov.Ihara.gui.*;
+
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        BaseController.setScreenSize(screenSize);
+
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("MainFrame.fxml"));
         Parent root = loader.load();
 
         primaryStage.setTitle("Ihara calculator(name temporary)");
-        Scene scene = new Scene(root, 1200, 700);
+        Scene scene = new Scene(root, screenSize.width / 2.0, screenSize.height / 2.0);
         primaryStage.setScene(scene);
         BaseController.setScene(scene);
-
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        BaseController.setScreenSize(screenSize);
 
         primaryStage.show();
     }

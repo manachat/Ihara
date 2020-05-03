@@ -1,4 +1,4 @@
-package ru.hse.edu.vafilonov.Ihara;
+package ru.hse.edu.vafilonov.Ihara.gui;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;

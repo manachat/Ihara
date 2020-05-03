@@ -1,6 +1,4 @@
-package ru.hse.edu.vafilonov.Ihara;
-
-import javafx.scene.shape.Shape;
+package ru.hse.edu.vafilonov.Ihara.model;
 
 public class GraphEdge extends AbstractGraphElement {
     private GraphNode origin;

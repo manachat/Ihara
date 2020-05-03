@@ -1,4 +1,4 @@
-package ru.hse.edu.vafilonov.Ihara;
+package ru.hse.edu.vafilonov.Ihara.gui;
 
 import javafx.scene.Scene;
 import java.awt.Dimension;
