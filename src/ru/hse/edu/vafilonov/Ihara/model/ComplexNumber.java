@@ -4,9 +4,46 @@ public final class ComplexNumber extends Number{
     private final double re;
     private final double im;
 
-    public static final ComplexNumber addId = new ComplexNumber(0, 0);
+    public static ComplexNumber getAddId() {
+        return new ComplexNumber(0., 0.);
+    }
 
-    public static final ComplexNumber multId = new ComplexNumber(1, 0);
+    public static ComplexNumber getMultId() {
+        return new ComplexNumber(1., 0.);
+    }
+
+    public static ComplexNumber sum(ComplexNumber a, ComplexNumber b){
+        double x = a.re + b.re;
+        double y = a.im + b.im;
+        return new ComplexNumber(x, y);
+    }
+
+    public static ComplexNumber multiply(ComplexNumber a, ComplexNumber b){
+        double x = a.re*b.re - a.im*b.im;
+        double y = a.re*b.im + a.im*b.re;
+        return new ComplexNumber(x, y);
+    }
+
+    public static ComplexNumber pow(ComplexNumber base, int power){
+        if (power == 0){
+            return ComplexNumber.getMultId();
+        }
+        double re = base.getRe();
+        double im = base.getIm();
+        double x = base.getRe();
+        double y = base.getIm();
+        for (int i = 1; i < power; i++) {
+            double newX = x*re - y*im;
+            double newY = x*im + re*y;
+            x = newX;
+            y = newY;
+        }
+        ComplexNumber ret = new ComplexNumber(x, y);
+        if (power < 0){
+            return ret.getMultInverse();
+        }
+        return ret;
+    }
 
     public ComplexNumber(double re, double im){
         this.re = re;
@@ -27,18 +64,6 @@ public final class ComplexNumber extends Number{
         return squared ? r2 : Math.sqrt(r2);
     }
 
-    public static ComplexNumber sum(ComplexNumber a, ComplexNumber b){
-        double x = a.re + b.re;
-        double y = a.im + b.im;
-        return new ComplexNumber(x, y);
-    }
-
-    public static ComplexNumber multiply(ComplexNumber a, ComplexNumber b){
-        double x = a.re*b.re - a.im*b.im;
-        double y = a.re*b.im + a.im*b.re;
-        return new ComplexNumber(x, y);
-    }
-
     public ComplexNumber getAddInverse(){
         return new ComplexNumber(-re, - im);
     }
@@ -51,12 +76,27 @@ public final class ComplexNumber extends Number{
         return new ComplexNumber(x, y);
     }
 
+    public ComplexNumber copy(){
+        return new ComplexNumber(re, im);
+    }
+
     public double getRe() {
         return re;
     }
 
     public double getIm() {
         return im;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ComplexNumber){
+            ComplexNumber z = (ComplexNumber)obj;
+            return z.re == re && z.im == im;
+        }
+        else {
+            return false;
+        }
     }
 
     @Override
@@ -77,5 +117,10 @@ public final class ComplexNumber extends Number{
     @Override
     public double doubleValue() {
         return re;
+    }
+
+    @Override
+    public String toString(){
+        return String.format("%.3f + i%.3f", re, im);
     }
 }

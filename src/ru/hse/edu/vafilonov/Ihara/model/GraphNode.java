@@ -11,6 +11,8 @@ public class GraphNode extends AbstractGraphElement {
 
     List<GraphEdge> connections = new ArrayList<>(10);
 
+    private int color = 0; //used in graph traversals
+
     /**
      * return unoriented degree of graph
      * @return
@@ -89,6 +91,11 @@ public class GraphNode extends AbstractGraphElement {
         return null;
     }
 
+    public int getColor() {
+        return color;
+    }
 
-
+    public void setColor(int color) {
+        this.color = color;
+    }
 }

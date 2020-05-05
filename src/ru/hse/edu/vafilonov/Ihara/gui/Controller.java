@@ -3,6 +3,7 @@ package ru.hse.edu.vafilonov.Ihara.gui;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.*;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -15,11 +16,48 @@ import javafx.scene.shape.Shape;
 import java.util.HashMap;
 import java.util.List;
 
+import ru.hse.edu.vafilonov.Ihara.model.*;
+
 public class Controller extends BaseController{
     @FXML
     private Canvas mainCanvas;
+
     @FXML
     private AnchorPane workingField;
+
+    @FXML
+    private TextField argumentText;
+
+    @FXML
+    private Label resultLabel;
+
+    @FXML
+    private Button fireButton;
+
+    @FXML
+    private void fireButtonClickHandler(MouseEvent e){
+        if (argumentText.getText().isEmpty()){
+            Alert msg = new Alert(Alert.AlertType.ERROR, "Empty input", ButtonType.OK);
+            msg.setTitle("Error");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+        }
+        double arg;
+        try {
+            arg = Double.parseDouble(argumentText.getText());
+        }
+        catch (NumberFormatException nex){
+            Alert msg = new Alert(Alert.AlertType.ERROR, "Incorrect input format", ButtonType.OK);
+            msg.setTitle("Error");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+            return;
+        }
+        ComplexNumber res = model.calculateZetaTheoremOneA(new ComplexNumber(arg, 0));
+        resultLabel.setText(res.toString());
+    }
 
     @FXML
     private void workingFieldClickHandler(MouseEvent e){
