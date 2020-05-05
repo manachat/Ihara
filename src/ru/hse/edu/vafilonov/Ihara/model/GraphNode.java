@@ -9,7 +9,7 @@ import java.util.List;
 
 public class GraphNode extends AbstractGraphElement {
 
-    List<GraphEdge> connections = new ArrayList<>(10);
+    private List<GraphEdge> connections = new ArrayList<>(10);
 
     private int color = 0; //used in graph traversals
 

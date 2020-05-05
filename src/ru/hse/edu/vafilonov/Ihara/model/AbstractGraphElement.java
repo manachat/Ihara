@@ -9,8 +9,6 @@ public abstract class AbstractGraphElement {
 
     protected int hash;
 
-    protected GraphModel graph;
-
     public AbstractGraphElement(){
         hash = nextHash;
         nextHash++;

@@ -19,7 +19,7 @@ public class Main extends Application {
         BaseController.setScreenSize(screenSize);
 
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("MainFrame.fxml"));
+        loader.setLocation(getClass().getResource("resources/fxml/MainFrame.fxml"));
         Parent root = loader.load();
 
         primaryStage.setTitle("Ihara calculator(name temporary)");

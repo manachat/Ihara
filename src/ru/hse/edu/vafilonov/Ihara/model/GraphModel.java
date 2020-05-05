@@ -65,6 +65,19 @@ public class GraphModel {
 
      */
 
+    /**
+     * helper method
+     * checks if all non-zero weights on edges were set
+     * throws
+     */
+    private void checkWeights() throws ArithmeticException{
+        for (GraphEdge e: graphEdges) {
+            if (e.getWeight() == 0.0){
+                throw new ArithmeticException("Веса не могут быть нулевыми");
+            }
+        }
+    }
+
     //-----------------------------------------------------FORMULAS-------------------------------------
 
     public ComplexNumber calculateZetaTheoremOneA(ComplexNumber u){
@@ -75,10 +88,11 @@ public class GraphModel {
         return resultMatrix.getDeterminant();
     }
 
-    public ComplexNumber calculateZetaTheoremOneB(ComplexNumber u){
+    public ComplexNumber calculateZetaTheoremOneB(ComplexNumber u) throws ArithmeticException {
         if (u.equals(ComplexNumber.getMultId())){
             return ComplexNumber.getAddId();
         }
+
         ComplexMatrix id = ComplexMatrix.getIdentityMatrix(graphNodes.size());
         ComplexMatrix adjacency = constructAdjacencyMatrix();
         ComplexMatrix Q = constructQMatrix();
@@ -88,7 +102,30 @@ public class GraphModel {
         ComplexMatrix intermediate = ComplexMatrix.sum(id, uA); // I - uA
         ComplexMatrix result = ComplexMatrix.sum(intermediate, uSqQ); // I - uA + u^2Q
         int power = graphEdges.size() - graphNodes.size(); //m - n
-        ComplexNumber base = ComplexNumber.sum(ComplexNumber.getAddId(), uSquared.getAddInverse()); // 1 - u^2
+        ComplexNumber base = ComplexNumber.sum(ComplexNumber.getMultId(), uSquared.getAddInverse()); // 1 - u^2
+        ComplexNumber coef = ComplexNumber.pow(base, power); //(1 - u^2)^(m - n)
+        ComplexNumber det = result.getDeterminant(); // det(I - uA + u^2Q)
+        return ComplexNumber.multiply(coef, det);
+    }
+
+    //TODO убрать дефолтный нулевой вес, сделать проверку на веса (нулевые или отсутствие)
+    public ComplexNumber calculateZetaTheoremThree(ComplexNumber u) throws ArithmeticException{
+        if (u.equals(ComplexNumber.getMultId())){
+            return ComplexNumber.getAddId();
+        }
+
+        checkWeights();
+
+        ComplexMatrix id = ComplexMatrix.getIdentityMatrix(graphNodes.size());
+        ComplexMatrix adjacency = constructWeightedAdjacencyMatrix();
+        ComplexMatrix Q = constructQMatrix();
+        ComplexNumber uSquared = ComplexNumber.multiply(u, u);
+        ComplexMatrix uW = adjacency.scalarMult(u.getAddInverse()); //-uW
+        ComplexMatrix uSqQ = Q.scalarMult(uSquared);
+        ComplexMatrix intermediate = ComplexMatrix.sum(id, uW); // I - uW
+        ComplexMatrix result = ComplexMatrix.sum(intermediate, uSqQ); // I - uW + u^2Q
+        int power = graphEdges.size() - graphNodes.size(); //m - n
+        ComplexNumber base = ComplexNumber.sum(ComplexNumber.getMultId(), uSquared.getAddInverse()); // 1 - u^2
         ComplexNumber coef = ComplexNumber.pow(base, power); //(1 - u^2)^(m - n)
         ComplexNumber det = result.getDeterminant(); // det(I - uA + u^2Q)
         return ComplexNumber.multiply(coef, det);
@@ -96,7 +133,7 @@ public class GraphModel {
 
 
     /**
-     * Constructs unweighted adracency matrix
+     * Constructs unweighted adjacency matrix
      * form current graph state
      * @return adjacency matrix
      */
@@ -116,6 +153,41 @@ public class GraphModel {
                     else {
                         matrix[i][j] = 1.;
                         matrix[j][i] = 1.;
+                    }
+                }
+            }
+        }
+        return new ComplexMatrix(matrix);
+    }
+
+    /**
+     * Constructs weighted adjacency matrix
+     * for current graph state
+     * @return weighted adjacency matrix
+     */
+    private ComplexMatrix constructWeightedAdjacencyMatrix(){
+        int size = graphNodes.size();
+        double[][] matrix = new double[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = i; j < size; j++) {
+                if (i == j){
+                    matrix[i][j] = 0.;
+                }
+                else {
+                    GraphEdge edge = GraphNode.getConnection(graphNodes.get(i), graphNodes.get(j));
+                    if (edge == null) {
+                        matrix[i][j] = 0.;
+                        matrix[j][i] = 0.;
+                    }
+                    else { //TODO проверить на деление на 0 или запретить 0 вовсе
+                        if (graphNodes.get(i) == edge.getOrigin()) {
+                            matrix[i][j] = edge.getWeight(); // weight in forward direction
+                            matrix[j][i] = 1.0 / matrix[i][j]; // 1 / weight in reverse direction
+                        }
+                        else {
+                            matrix[j][i] = edge.getWeight();
+                            matrix[i][j] = 1.0 / matrix[j][i];
+                        }
                     }
                 }
             }

@@ -3,15 +3,11 @@ package ru.hse.edu.vafilonov.Ihara.model;
 public class GraphEdge extends AbstractGraphElement {
     private GraphNode origin;
     private GraphNode tail;
-    private double weight;
+    private double weight = 0.0;
 
     public GraphEdge(GraphNode origin, GraphNode tail){
         this.origin = origin;
         this.tail = tail;
-    }
-
-    public void setWeight(double w){
-        weight = w;
     }
 
     @Override
@@ -20,6 +16,13 @@ public class GraphEdge extends AbstractGraphElement {
         tail = null;
     }
 
+    public void setWeight(double w){
+        weight = w;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
 
     public GraphNode getOrigin() {
         return origin;

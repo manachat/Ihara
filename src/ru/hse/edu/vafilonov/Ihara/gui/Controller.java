@@ -15,7 +15,10 @@ import javafx.scene.shape.Shape;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import ru.hse.edu.vafilonov.Ihara.model.*;
 
 public class Controller extends BaseController{
@@ -26,37 +29,83 @@ public class Controller extends BaseController{
     private AnchorPane workingField;
 
     @FXML
-    private TextField argumentText;
+    private TextField reText;
 
     @FXML
-    private Label resultLabel;
+    private TextField imText;
+
+    @FXML
+    private Label hashimotoLabel;
+
+    @FXML
+    private Label bassLabel;
+
+    @FXML
+    private Label mizunosatoLabel;
 
     @FXML
     private Button fireButton;
 
     @FXML
+    private ComboBox<String> functionComboBox;
+
+    @FXML
+    public void initialize(){
+        //TODO приделать листнер который заменит отрисовки ребер на вариант с числами
+        functionComboBox.getItems().addAll(functionHashimoto, functionBass, functionMizunoSato);
+        functionComboBox.setValue(functionHashimoto);
+        model = new GraphModel(workingField);
+    }
+
+    @FXML
     private void fireButtonClickHandler(MouseEvent e){
-        if (argumentText.getText().isEmpty()){
-            Alert msg = new Alert(Alert.AlertType.ERROR, "Empty input", ButtonType.OK);
-            msg.setTitle("Error");
-            msg.setHeaderText(null);
-            msg.setGraphic(null);
-            msg.show();
-        }
-        double arg;
-        try {
-            arg = Double.parseDouble(argumentText.getText());
-        }
-        catch (NumberFormatException nex){
-            Alert msg = new Alert(Alert.AlertType.ERROR, "Incorrect input format", ButtonType.OK);
+        if (reText.getText().isEmpty() || imText.getText().isEmpty()){
+            Alert msg = new Alert(Alert.AlertType.ERROR, "Не задан аргумент функции", ButtonType.OK);
             msg.setTitle("Error");
             msg.setHeaderText(null);
             msg.setGraphic(null);
             msg.show();
             return;
         }
-        ComplexNumber res = model.calculateZetaTheoremOneA(new ComplexNumber(arg, 0));
-        resultLabel.setText(res.toString());
+        double re;
+        double im;
+        try {
+            re = Double.parseDouble(reText.getText());
+            im = Double.parseDouble(imText.getText());
+        }
+        catch (NumberFormatException nex){
+            Alert msg = new Alert(Alert.AlertType.ERROR, "Некорректный ввод", ButtonType.OK);
+            msg.setTitle("Error");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+            return;
+        }
+        ComplexNumber res;
+        switch (functionComboBox.getValue()){
+            case functionHashimoto:
+                res = model.calculateZetaTheoremOneA(new ComplexNumber(re, im));
+                hashimotoLabel.setText(res.toString());
+                break;
+            case functionBass:
+                res = model.calculateZetaTheoremOneB(new ComplexNumber(re, im));
+                bassLabel.setText(res.toString());
+                break;
+            case functionMizunoSato:
+                try {
+                    res = model.calculateZetaTheoremThree(new ComplexNumber(re, im));
+                    mizunosatoLabel.setText(res.toString());
+                }
+                catch (ArithmeticException arex){
+                    Alert msg = new Alert(Alert.AlertType.ERROR, arex.getMessage(), ButtonType.OK);
+                    msg.setTitle("Error");
+                    msg.setHeaderText(null);
+                    msg.setGraphic(null);
+                    msg.show();
+                    return;
+                }
+                break;
+        }
     }
 
     @FXML
@@ -68,67 +117,10 @@ public class Controller extends BaseController{
         double x = e.getX();
         double y = e.getY();
         GraphNode graphNode = new GraphNode();
-        Circle c = new Circle(x,y,nodeRadius,nodeColor);
+        Circle c = new Circle(x, y, nodeRadius, nodeColor);
 
         //--------------------------------------------------------------------------------
-        c.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event){
-                //delete node
-                if (event.getButton() == MouseButton.SECONDARY){
-                    deleteNode(graphNode); // closure on created node object TODO CLOSURE
-                }//select node
-                else{
-                    if (!nodeSelected) { //select
-                        selectedNode = graphNode; // TODO CLOSURE
-                        ((Circle)event.getTarget()).setStroke(Color.BLACK);
-                        nodeSelected = true;
-                    }
-                    else { //remove selection
-                        if (selectedNode != graphNode){ //create node (or not create)TODO CLOSURE
-                            GraphEdge conn = GraphNode.getConnection(selectedNode, graphNode);
-                            if (conn == null) {//nodes not connected
-                                //CREATE EDGE
-                                GraphNode origin = selectedNode;
-                                GraphNode tail = graphNode;
-                                GraphEdge graphEdge = new GraphEdge(origin, tail);
-                                Circle oCircle = (Circle) nodemap.get(origin);
-                                Circle tCircle = (Circle) nodemap.get(tail);
-                                Shape arc = constructArrow(oCircle.getCenterX(), oCircle.getCenterY(),
-                                        tCircle.getCenterX(), tCircle.getCenterY());
-
-
-                                //-------------------------------------------------------------------------
-                                arc.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                                    @Override
-                                    public void handle(MouseEvent mouseEvent) {
-                                        if (mouseEvent.getButton() == MouseButton.PRIMARY) { //set weight
-                                            //TODO implement, dialog with weight maybe
-                                        }
-                                        else if (mouseEvent.getButton() == MouseButton.SECONDARY) { //delete
-                                            deleteEdge(graphEdge); // TODO CLOSURE
-                                        }
-                                        mouseEvent.consume();
-                                    }
-                                });
-                                //--------------------------------------------------------------------------
-
-                                workingField.getChildren().add(arc);
-                                model.addEdge(graphEdge);
-                                edgemap.put(graphEdge, arc);
-                            }
-                            else{ //connection already exists
-                                //TODO alert dialog
-                            }
-                        }
-                        ((Circle)nodemap.get(selectedNode)).setStroke(null);
-                        nodeSelected = false;
-
-                    }
-                }
-                event.consume();
-            }
-        });
+        attachNodeHandler(c, graphNode);
         //-------------------------------------------------------------------------------------------------
 
         nodemap.put(graphNode, c); //connect node with GUI via hashmap
@@ -143,16 +135,14 @@ public class Controller extends BaseController{
     private final double arrowWing = 10;
     private final double cosWing = Math.cos(Math.PI / 12);
     private final double sinWing = Math.sin(Math.PI / 12);
+    private final String functionHashimoto = "Hashimoto";
+    private final String functionBass = "Bass";
+    private final String functionMizunoSato = "Mizuno,Sato";
     private Paint nodeColor = Color.RED;
 
-    HashMap<GraphNode, Shape> nodemap = new HashMap<>();
-    HashMap<GraphEdge, Shape> edgemap = new HashMap<>();
-    private GraphModel model = new GraphModel(workingField);
-
-    private void createEdge(){
-
-    }
-
+    private HashMap<GraphNode, Shape> nodemap = new HashMap<>();
+    private HashMap<GraphEdge, Shape> edgemap = new HashMap<>();
+    private GraphModel model;
 
     private void deleteNode(GraphNode node){
         Shape figure = nodemap.remove(node); //remove from map
@@ -176,7 +166,7 @@ public class Controller extends BaseController{
         model.removeEdge(edge);
     }
 
-    private Shape constructArrow(double x1, double y1, double x2, double y2){
+    private Shape constructArrow(double x1, double y1, double x2, double y2, boolean weighted, double value){
         double vectorX = x2 - x1;
         double vectorY = y2 - y1;
         double length = Math.sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
@@ -188,17 +178,147 @@ public class Controller extends BaseController{
         y2 -= (nodeRadius + 2) * vectorY;
         Line mainLine = new Line(x1, y1, x2, y2);
         mainLine.setStrokeWidth(2.5);
-        double xWproj = -arrowWing * vectorX;
-        double yWproj = -arrowWing * vectorY;
-        double x = xWproj * cosWing - yWproj * sinWing;
-        double y = xWproj * sinWing + yWproj * cosWing;
-        Line firstwing = new Line(x2, y2, x2 + x, y2 + y);
-        x = xWproj * cosWing + yWproj * sinWing;
-        y = -xWproj * sinWing + yWproj * cosWing;
-        Line secondwing = new Line(x2, y2, x2 + x, y2 + y);
-        firstwing.setStrokeWidth(2);
-        secondwing.setStrokeWidth(2);
-        return Shape.union(mainLine, Shape.union(firstwing, secondwing));
+        if (weighted) {
+            double xWproj = -arrowWing * vectorX;
+            double yWproj = -arrowWing * vectorY;
+            double x = xWproj * cosWing - yWproj * sinWing;
+            double y = xWproj * sinWing + yWproj * cosWing;
+            Line firstwing = new Line(x2, y2, x2 + x, y2 + y);
+            x = xWproj * cosWing + yWproj * sinWing;
+            y = -xWproj * sinWing + yWproj * cosWing;
+            Line secondwing = new Line(x2, y2, x2 + x, y2 + y);
+            firstwing.setStrokeWidth(2);
+            secondwing.setStrokeWidth(2);
+            Text weight = new Text((x1 + x2)/2., (y1 + y2)/2., String.format("%.3f", value));
+            weight.setFont(new Font(20));
+            Shape arrow = Shape.union(mainLine, Shape.union(firstwing, secondwing));
+            return Shape.union(arrow, weight);
+        }
+        else{
+            return mainLine;
+        }
     }
+
+    /**
+     * Helper method
+     * Sets click handler for created circle
+     * @param circle circle shape
+     * @param graphNode associated node object
+     */
+    private void attachNodeHandler(Shape circle, GraphNode graphNode){
+        circle.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event){
+                //delete node
+                if (event.getButton() == MouseButton.SECONDARY){
+                    deleteNode(graphNode); // closure on created node object TODO CLOSURE
+                }//select node
+                else{
+                    if (!nodeSelected) { //select
+                        selectedNode = graphNode; // TODO CLOSURE
+                        ((Circle)event.getTarget()).setStroke(Color.BLACK);
+                        nodeSelected = true;
+                    }
+                    else {
+                        if (selectedNode != graphNode){ //create edge (or not create)TODO CLOSURE
+                            GraphEdge conn = GraphNode.getConnection(selectedNode, graphNode);
+                            if (conn == null) {//nodes not connected
+                                //CREATE EDGE
+                                GraphNode origin = selectedNode;
+                                GraphNode tail = graphNode;
+                                GraphEdge graphEdge = new GraphEdge(origin, tail);
+                                Circle oCircle = (Circle) nodemap.get(origin);
+                                Circle tCircle = (Circle) nodemap.get(tail);
+                                Shape arc;
+                                if (functionComboBox.getValue().equals(functionMizunoSato)){ //weighted func
+                                    arc = constructArrow(oCircle.getCenterX(), oCircle.getCenterY(),
+                                            tCircle.getCenterX(), tCircle.getCenterY(), true, 0.0);
+                                }
+                                else {
+                                    arc = constructArrow(oCircle.getCenterX(), oCircle.getCenterY(),
+                                            tCircle.getCenterX(), tCircle.getCenterY(), false, 0.0);
+                                }
+
+                                //-------------------------------------------------------------------------
+                                attachEdgeHandler(arc, graphEdge);
+                                //--------------------------------------------------------------------------
+
+                                workingField.getChildren().add(arc);
+                                model.addEdge(graphEdge);
+                                edgemap.put(graphEdge, arc);
+                            }
+                            else{ //connection already exists
+                                Alert msg = new Alert(Alert.AlertType.ERROR, "Узлы уже соединены", ButtonType.OK);
+                                msg.setTitle("Предупреждение");
+                                msg.setHeaderText(null);
+                                msg.setGraphic(null);
+                                msg.show();
+                            }
+                        }
+                        ((Circle)nodemap.get(selectedNode)).setStroke(null);
+                        nodeSelected = false;
+
+                    }
+                }
+                event.consume();
+            }
+        });
+    }
+
+    /**
+     * Helper method
+     * Sets click handler for created arc
+     * @param arc arc shape
+     * @param graphEdge associated edge object
+     */
+    private void attachEdgeHandler(Shape arc, GraphEdge graphEdge){
+        arc.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent mouseEvent) {
+                if (mouseEvent.getButton() == MouseButton.PRIMARY &&
+                        functionComboBox.getValue().equals(functionMizunoSato)) { //set weight
+                    TextInputDialog dialog = new TextInputDialog();
+                    dialog.setHeaderText(null);
+                    dialog.setGraphic(null);
+                    dialog.setTitle("Введите вес");
+                    dialog.setContentText("Вес: ");
+
+                    Optional<String> result = dialog.showAndWait();
+                    double w;
+                    if (result.isPresent()) {
+                        try {
+                            w = Double.parseDouble(result.get());
+                        }
+                        catch (NumberFormatException nex){
+                            Alert msg = new Alert(Alert.AlertType.ERROR, "Некорректный ввод", ButtonType.OK);
+                            msg.setTitle("Error");
+                            msg.setHeaderText(null);
+                            msg.setGraphic(null);
+                            msg.show();
+                            w = 0.0;
+                        }
+                        graphEdge.setWeight(w); //changes edge's weight
+                        workingField.getChildren().remove(arc); //remove old arc from gui
+                        //replace old arc with a new one
+                        Circle oCircle = (Circle) nodemap.get(graphEdge.getOrigin());
+                        Circle tCircle = (Circle) nodemap.get(graphEdge.getTail());
+                        Shape newarc = constructArrow(oCircle.getCenterX(), oCircle.getCenterY(),
+                                tCircle.getCenterX(), tCircle.getCenterY(), true, graphEdge.getWeight());
+                        attachEdgeHandler(newarc, graphEdge);
+                        edgemap.replace(graphEdge, newarc);
+                        workingField.getChildren().add(newarc);
+                    }
+                    else {
+                        return;
+                    }
+                }
+                else if (mouseEvent.getButton() == MouseButton.SECONDARY) { //delete
+                    deleteEdge(graphEdge); // TODO CLOSURE
+                }
+                mouseEvent.consume();
+            }
+        });
+    }
+
 
 }

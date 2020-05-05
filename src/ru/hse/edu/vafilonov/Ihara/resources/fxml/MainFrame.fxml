@@ -7,15 +7,41 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
 <GridPane fx:controller="ru.hse.edu.vafilonov.Ihara.gui.Controller"
           xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10" gridLinesVisible="true" >
     <AnchorPane fx:id="workingField"  GridPane.columnIndex="0" prefWidth="1000" prefHeight="700"
                 onMouseClicked="#workingFieldClickHandler" />
-    <HBox GridPane.columnIndex="1">
-        <TextField fx:id="argumentText" />
+    <VBox GridPane.columnIndex="1">
+        <HBox>
+            <Label text="Re: "/>
+            <TextField fx:id="reText" />
+        </HBox>
+        <HBox>
+            <Label text="Im: "/>
+            <TextField fx:id="imText" text="0.0"/>
+        </HBox>
+        <HBox>
+            <Label text="Hashimoto: "/>
+            <Label fx:id="hashimotoLabel"/>
+        </HBox>
+        <HBox>
+            <Label text="Mizuno, Sato: "/>
+            <Label fx:id="mizunosatoLabel"/>
+        </HBox>
+        <HBox>
+            <Label text="Function: "/>
+            <ComboBox fx:id="functionComboBox"/>
+        </HBox>
+        <HBox>
+            <Label text="Bass: "/>
+            <Label fx:id="bassLabel"/>
+        </HBox>
         <Button fx:id="fireButton" text="calculate" onMouseClicked="#fireButtonClickHandler"/>
-        <Label fx:id="resultLabel" />
-    </HBox>
+    </VBox>
 
 
 </GridPane>

@@ -126,6 +126,7 @@ public class ComplexMatrix{
         }
 
         ComplexNumber det = ComplexNumber.getMultId(); //result
+        int swaps = 0; //number of row swaps
         //going down diagonal, search for leading element and reduce all the elements under the lead
         for (int i = 0; i < N; i++){
             int leadRow = i; //row with lead element
@@ -140,16 +141,19 @@ public class ComplexMatrix{
             //elevate row with lead element to preserve triangle form
             if (leadRow > i){
                 switchRows(copy, i, leadRow);
+                swaps++; //each swap changes det sigh
             }
             ComplexNumber lead = copy[i][i];
             ComplexNumber invLead = lead.getMultInverse();
             for (int j = i + 1; j < N; j++){
-                ComplexNumber coefficient = ComplexNumber.multiply(copy[i][j], invLead); //c = m[i][j]/lead
-                addRow(copy, j, i, invLead.getAddInverse()); // subtraction of row
+                ComplexNumber coefficient = ComplexNumber.multiply(copy[j][i], invLead); //c = m[j][i]/lead
+                addRow(copy, j, i, coefficient.getAddInverse()); // subtraction of row
             }
             det = ComplexNumber.multiply(det, copy[i][i]);
         }
-
+        if (swaps % 2 != 0){
+            det = det.getAddInverse();
+        }
         return det;
     }
 

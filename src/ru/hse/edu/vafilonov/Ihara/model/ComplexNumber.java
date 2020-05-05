@@ -121,6 +121,25 @@ public final class ComplexNumber extends Number{
 
     @Override
     public String toString(){
-        return String.format("%.3f + i%.3f", re, im);
+        StringBuilder builder = new StringBuilder();
+        if (re != 0.0){
+            builder.append(String.format("%.4f", re));
+            if (im > 0.0){
+                builder.append(String.format(" + i%.3f", im));
+            }
+            else if (im < 0.0){
+                builder.append(String.format(" - i%.3f", Math.abs(im)));
+            }
+        }
+        else {
+            if (im > 0.0){
+                builder.append(String.format(" + i%.3f", im));
+            }
+            else if (im < 0.0){
+                builder.append(String.format("-i%.3f", Math.abs(im)));
+            }
+            else return "0.0";
+        }
+        return builder.toString();
     }
 }
