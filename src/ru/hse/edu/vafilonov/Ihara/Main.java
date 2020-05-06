@@ -24,10 +24,11 @@ public class Main extends Application {
         loader.setLocation(getClass().getResource("resources/fxml/MainFrame.fxml"));
         Parent root = loader.load();
 
-        primaryStage.setTitle("Ihara calculator(name temporary)");
+        primaryStage.setTitle("Ihara zeta calculator");
         Scene scene = new Scene(root, screenSize.width / 2.0, screenSize.height / 2.0);
         primaryStage.setScene(scene);
         BaseController.setScene(scene);
+        ((Controller)loader.getController()).setListeners();
 
 
         primaryStage.show();

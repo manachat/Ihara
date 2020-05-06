@@ -2,6 +2,7 @@ package ru.hse.edu.vafilonov.Ihara.gui;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.canvas.*;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
@@ -55,6 +56,9 @@ public class Controller extends BaseController{
         controlBox.setPrefHeight(screenSize.getHeight());
         controlBox.setMaxWidth(screenSize.getWidth());
         controlBox.setPrefWidth(screenSize.getWidth() / 8.);
+    }
+
+    public void setListeners(){
         /*
         listener for value of selected function
         changes shape of arrows according to function type
@@ -75,6 +79,12 @@ public class Controller extends BaseController{
                     arc.setOrientationVisibility(false);
                 }
             }
+        });
+        //resize panels
+        scene.widthProperty().addListener(property -> {
+            double newWidth = scene.getWidth();
+            workingField.setPrefWidth(newWidth * 3 / 4);
+            controlBox.setPrefWidth(newWidth / 4);
         });
     }
 
@@ -147,24 +157,29 @@ public class Controller extends BaseController{
     @FXML
     private void workingFieldClickHandler(MouseEvent e){
         if (e.getButton() == MouseButton.SECONDARY){
+            if (isNodeSelected){
+                ((Circle) nodemap.get(selectedNode)).setStroke(null);
+                isNodeSelected = false;
+            }
             return;
         }
+        else { //create new node
+            double x = e.getX();
+            double y = e.getY();
+            GraphNode graphNode = new GraphNode();
+            Circle c = new Circle(x, y, nodeRadius, nodeColor);
 
-        double x = e.getX();
-        double y = e.getY();
-        GraphNode graphNode = new GraphNode();
-        Circle c = new Circle(x, y, nodeRadius, nodeColor);
+            //--------------------------------------------------------------------------------
+            attachNodeHandler(c, graphNode);
+            //-------------------------------------------------------------------------------------------------
 
-        //--------------------------------------------------------------------------------
-        attachNodeHandler(c, graphNode);
-        //-------------------------------------------------------------------------------------------------
-
-        nodemap.put(graphNode, c); //connect node with GUI via hashmap
-        model.addNode(graphNode); //add node to graph
-        workingField.getChildren().add(c); //add visualisations to display
+            nodemap.put(graphNode, c); //connect node with GUI via hashmap
+            model.addNode(graphNode); //add node to graph
+            workingField.getChildren().add(c); //add visualisations to display
+        }
     }
 
-    private boolean nodeSelected = false;
+    private boolean isNodeSelected = false;
     private GraphNode selectedNode;
 
     private final double nodeRadius = 7.5;
@@ -189,7 +204,6 @@ public class Controller extends BaseController{
             Arrow arc = edgemap.remove(e); //remove from map
             workingField.getChildren().removeAll(arc.getAllElements());
         }
-
         // removal of model components
         model.removeNode(node);
     }
@@ -218,10 +232,10 @@ public class Controller extends BaseController{
                     deleteNode(graphNode); // closure on created node object TODO CLOSURE
                 }//select node
                 else{
-                    if (!nodeSelected) { //select
+                    if (!isNodeSelected) { //select
                         selectedNode = graphNode; // TODO CLOSURE
                         ((Circle)event.getTarget()).setStroke(Color.BLACK);
-                        nodeSelected = true;
+                        isNodeSelected = true;
                     }
                     else {
                         if (selectedNode != graphNode){ //create edge (or not create)TODO CLOSURE
@@ -259,8 +273,10 @@ public class Controller extends BaseController{
                                 msg.show();
                             }
                         }
-                        ((Circle)nodemap.get(selectedNode)).setStroke(null);
-                        nodeSelected = false;
+                        if (!event.isControlDown()) {
+                            ((Circle) nodemap.get(selectedNode)).setStroke(null);
+                            isNodeSelected = false;
+                        }
 
                     }
                 }
@@ -279,6 +295,7 @@ public class Controller extends BaseController{
         var handler = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
+                mouseEvent.consume();
                 if (mouseEvent.getButton() == MouseButton.PRIMARY &&
                         functionComboBox.getValue().equals(functionMizunoSato)) { //set weight
                     TextInputDialog dialog = new TextInputDialog();
@@ -307,14 +324,10 @@ public class Controller extends BaseController{
                         arc.setWeightText(w); //set new text
                         workingField.getChildren().add(arc.getWeightText()); //add new text
                     }
-                    else {
-                        return;
-                    }
                 }
                 else if (mouseEvent.getButton() == MouseButton.SECONDARY) { //delete
                     deleteEdge(graphEdge); // TODO CLOSURE
                 }
-                mouseEvent.consume();
             }
         };
         for (Shape s : arc.getAllElements()){

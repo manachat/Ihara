@@ -1,6 +1,7 @@
 package ru.hse.edu.vafilonov.Ihara.gui;
 
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
@@ -12,9 +13,10 @@ import java.util.List;
  * wrapper class for arc drawing
  */
 public class Arrow {
-    private final double arrowWing = 10;
-    private final double cosWing = Math.cos(Math.PI / 12);
-    private final double sinWing = Math.sin(Math.PI / 12);
+    private static final double arrowWing = 10;
+    private static final double cosWing = Math.cos(Math.PI / 12);
+    private static final double sinWing = Math.sin(Math.PI / 12);
+    private static final Paint textColor = Color.rgb(34,139,34);
 
     private double x1, y1, x2, y2; //saved circle values
 
@@ -45,9 +47,16 @@ public class Arrow {
         secondWing = new Line(x2, y2, x2 + x, y2 + y);
         firstWing.setStrokeWidth(2);
         secondWing.setStrokeWidth(2);
-        weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2., String.format("%.3f", value));
+        if ((vectorX >= 0) && (vectorY >= 0) || (vectorX <= 0) && (vectorY <= 0)) {
+            weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2., String.format("%.2f", value));
+        }
+        else { //text crosses arrow, need to move to the left
+            weightText = new Text((x1 + x2) / 2. - 30, (y1 + y2) / 2., String.format("%.2f", value));
+        }
         weightText.setFont(new Font(15));
-        weightText.setFill(Color.BLUE);
+        weightText.setFill(textColor);
+        weightText.setStroke(Color.BLACK);
+        weightText.setStrokeWidth(0.5);
         if (!weighted){
             firstWing.setVisible(false);
             secondWing.setVisible(false);
@@ -69,11 +78,20 @@ public class Arrow {
     }
 
     public void setWeightText(double weight){
+        double vectorX = x2 - x1;
+        double vectorY = y2 - y1;
         var handler = weightText.getOnMouseClicked();
         boolean visibility = weightText.isVisible();
-        weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2., String.format("%.3f", weight));
+        if ((vectorX >= 0) && (vectorY >= 0) || (vectorX <= 0) && (vectorY <= 0)) {
+            weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2., String.format("%.2f", weight));
+        }
+        else { //text crosses arrow, need to move to the left
+            weightText = new Text((x1 + x2) / 2. - 30, (y1 + y2) / 2., String.format("%.2f", weight));
+        }
         weightText.setFont(new Font(15));
-        weightText.setFill(Color.BLUE);
+        weightText.setFill(textColor);
+        weightText.setStroke(Color.BLACK);
+        weightText.setStrokeWidth(0.5);
         weightText.setVisible(visibility);
         weightText.setOnMouseClicked(handler);
     }
