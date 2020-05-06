@@ -15,26 +15,37 @@ import java.util.Queue;
 
 public class GraphModel {
 
-    private AnchorPane field;
-
-    private List<AbstractGraphElement> allGraphElements = new ArrayList<>(10);
     private List<GraphNode> graphNodes = new ArrayList<>(10);
     private List<GraphEdge> graphEdges = new ArrayList<>(10);
 
-    public GraphModel(AnchorPane field){
-        this.field = field;
+
+    public GraphModel(){
+
     }
 
+    /**
+     * Adds node to graph
+     * @param node added node
+     */
     public void addNode(GraphNode node){
         graphNodes.add(node);
     }
 
+    /**
+     * Adds edge to graph
+     * @param edge added edge
+     */
     public void addEdge(GraphEdge edge){
         graphEdges.add(edge);
         edge.getOrigin().connect(edge);
         edge.getTail().connect(edge);
     }
 
+    /**
+     * Disconnects node and removes it from graph
+     * Also removes edges connected to this node
+     * @param node removed node
+     */
     public void removeNode(GraphNode node){
         List<GraphEdge> adjacentEdges = node.getConnections();
         //remove horisontal connections
@@ -51,6 +62,10 @@ public class GraphModel {
         graphNodes.remove(node);
     }
 
+    /**
+     * Disconnects edge and removes it from graph
+     * @param edge removed edge
+     */
     public void removeEdge(GraphEdge edge){
         //remove horizontal connections
         edge.getTail().disconnect(edge);
@@ -58,6 +73,14 @@ public class GraphModel {
         edge.deleteElement();
         //remove vertical connection
         graphEdges.remove(edge);
+    }
+
+    public List<GraphNode> getGraphNodes() {
+        return graphNodes;
+    }
+
+    public List<GraphEdge> getGraphEdges() {
+        return graphEdges;
     }
 
     /**
@@ -96,8 +119,6 @@ public class GraphModel {
         }
         return allBlack;
     }
-
-
 
     /**
      * helper method

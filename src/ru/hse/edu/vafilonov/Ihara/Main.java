@@ -2,8 +2,10 @@ package ru.hse.edu.vafilonov.Ihara;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.awt.Dimension;
@@ -20,7 +22,7 @@ public class Main extends Application {
 
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("resources/fxml/MainFrame.fxml"));
-        Parent root = loader.load();
+        AnchorPane root = loader.load();
 
         primaryStage.setTitle("Ihara calculator(name temporary)");
         Scene scene = new Scene(root, screenSize.width / 2.0, screenSize.height / 2.0);

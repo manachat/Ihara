@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
@@ -21,10 +22,10 @@ import ru.hse.edu.vafilonov.Ihara.model.*;
 
 public class Controller extends BaseController{
     @FXML
-    private Canvas mainCanvas;
+    private AnchorPane workingField;
 
     @FXML
-    private AnchorPane workingField;
+    private VBox controlBox;
 
     @FXML
     private TextField reText;
@@ -43,14 +44,38 @@ public class Controller extends BaseController{
 
     @FXML
     public void initialize(){
-        //TODO приделать листнер который заменит отрисовки ребер на вариант с числами
         functionComboBox.getItems().addAll(functionHashimoto, functionBass, functionMizunoSato);
         functionComboBox.setValue(functionHashimoto);
-        model = new GraphModel(workingField);
+        model = new GraphModel();
+        workingField.setMaxHeight(screenSize.getHeight());
+        workingField.setPrefHeight(screenSize.getHeight());
+        controlBox.setMaxHeight(screenSize.getHeight());
+        controlBox.setPrefHeight(screenSize.getHeight());
+        /*
+        listener for value of selected function
+        changes shape of arrows according to function type
+         */
+        functionComboBox.valueProperty().addListener(property -> {
+            if (model.getGraphEdges().size() == 0){
+                return; //nothing to change
+            }
+            if (functionComboBox.getValue().equals(functionMizunoSato)){
+                for (GraphEdge e : model.getGraphEdges()){
+                    Arrow arc = edgemap.get(e);
+                    arc.setOrientationVisibility(true);
+                }
+            }
+            else{
+                for (GraphEdge e : model.getGraphEdges()){
+                    Arrow arc = edgemap.get(e);
+                    arc.setOrientationVisibility(false);
+                }
+            }
+        });
     }
 
     @FXML
-    private void fireButtonClickHandler(MouseEvent e){
+    private void calculateButtonClickHandler(MouseEvent e){
         if (reText.getText().isEmpty() || imText.getText().isEmpty()){
             Alert msg = new Alert(Alert.AlertType.ERROR, "Не задан аргумент функции", ButtonType.OK);
             msg.setTitle("Error");
@@ -148,7 +173,7 @@ public class Controller extends BaseController{
     private Paint nodeColor = Color.RED;
 
     private HashMap<GraphNode, Shape> nodemap = new HashMap<>();
-    private HashMap<GraphEdge, Shape> edgemap = new HashMap<>();
+    private HashMap<GraphEdge, Arrow> edgemap = new HashMap<>();
     private GraphModel model;
 
     private void deleteNode(GraphNode node){
@@ -157,8 +182,8 @@ public class Controller extends BaseController{
         workingField.getChildren().remove(figure);
         List<GraphEdge> adjacentEdges = node.getConnections(); //get node edges to find reps
         for (GraphEdge e : adjacentEdges){ //remove arrows from user screen
-            Shape arc = edgemap.remove(e); //remove from map
-            workingField.getChildren().remove(arc);
+            Arrow arc = edgemap.remove(e); //remove from map
+            workingField.getChildren().removeAll(arc.getAllElements());
         }
 
         // removal of model components
@@ -167,45 +192,12 @@ public class Controller extends BaseController{
 
     private void deleteEdge(GraphEdge edge){
         //removal of GUI components
-        Shape figure = edgemap.remove(edge);
-        workingField.getChildren().remove(figure);
+        Arrow figure = edgemap.remove(edge);
+        workingField.getChildren().removeAll(figure.getAllElements());
         //removal of model components
         model.removeEdge(edge);
     }
 
-    private Shape constructArrow(double x1, double y1, double x2, double y2, boolean weighted, double value){
-        double vectorX = x2 - x1;
-        double vectorY = y2 - y1;
-        double length = Math.sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
-        vectorX /= length;
-        vectorY /= length;
-        x1 += (nodeRadius + 2) * vectorX;
-        y1 += (nodeRadius + 2) * vectorY;
-        x2 -= (nodeRadius + 2) * vectorX;
-        y2 -= (nodeRadius + 2) * vectorY;
-        Line mainLine = new Line(x1, y1, x2, y2);
-        mainLine.setStrokeWidth(2.5);
-        if (weighted) {
-            double xWproj = -arrowWing * vectorX;
-            double yWproj = -arrowWing * vectorY;
-            double x = xWproj * cosWing - yWproj * sinWing;
-            double y = xWproj * sinWing + yWproj * cosWing;
-            Line firstwing = new Line(x2, y2, x2 + x, y2 + y);
-            x = xWproj * cosWing + yWproj * sinWing;
-            y = -xWproj * sinWing + yWproj * cosWing;
-            Line secondwing = new Line(x2, y2, x2 + x, y2 + y);
-            firstwing.setStrokeWidth(2);
-            secondwing.setStrokeWidth(2);
-            Text weight = new Text((x1 + x2)/2., (y1 + y2)/2., String.format("%.3f", value));
-            weight.setFont(new Font(20));
-            Shape arrow = Shape.union(mainLine, Shape.union(firstwing, secondwing));
-            List<PathElement> els = ((Path)arrow).getElements();
-            return Shape.union(arrow, weight);
-        }
-        else{
-            return mainLine;
-        }
-    }
 
     /**
      * Helper method
@@ -237,21 +229,21 @@ public class Controller extends BaseController{
                                 GraphEdge graphEdge = new GraphEdge(origin, tail);
                                 Circle oCircle = (Circle) nodemap.get(origin);
                                 Circle tCircle = (Circle) nodemap.get(tail);
-                                Shape arc;
+                                Arrow arc;
                                 if (functionComboBox.getValue().equals(functionMizunoSato)){ //weighted func
-                                    arc = constructArrow(oCircle.getCenterX(), oCircle.getCenterY(),
-                                            tCircle.getCenterX(), tCircle.getCenterY(), true, 0.0);
+                                    arc = new Arrow(oCircle.getCenterX(), oCircle.getCenterY(),
+                                            tCircle.getCenterX(), tCircle.getCenterY(), nodeRadius, true, 0.0);
                                 }
                                 else {
-                                    arc = constructArrow(oCircle.getCenterX(), oCircle.getCenterY(),
-                                            tCircle.getCenterX(), tCircle.getCenterY(), false, 0.0);
+                                    arc = new Arrow(oCircle.getCenterX(), oCircle.getCenterY(),
+                                            tCircle.getCenterX(), tCircle.getCenterY(), nodeRadius, false, 0.0);
                                 }
 
                                 //-------------------------------------------------------------------------
                                 attachEdgeHandler(arc, graphEdge);
                                 //--------------------------------------------------------------------------
 
-                                workingField.getChildren().add(arc);
+                                workingField.getChildren().addAll(arc.getAllElements());
                                 model.addEdge(graphEdge);
                                 edgemap.put(graphEdge, arc);
                             }
@@ -279,8 +271,8 @@ public class Controller extends BaseController{
      * @param arc arc shape
      * @param graphEdge associated edge object
      */
-    private void attachEdgeHandler(Shape arc, GraphEdge graphEdge){
-        arc.setOnMouseClicked(new EventHandler<MouseEvent>() {
+    private void attachEdgeHandler(Arrow arc, GraphEdge graphEdge){
+        var handler = new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
                 if (mouseEvent.getButton() == MouseButton.PRIMARY &&
@@ -306,15 +298,10 @@ public class Controller extends BaseController{
                             w = 0.0;
                         }
                         graphEdge.setWeight(w); //changes edge's weight
-                        workingField.getChildren().remove(arc); //remove old arc from gui
-                        //replace old arc with a new one
-                        Circle oCircle = (Circle) nodemap.get(graphEdge.getOrigin());
-                        Circle tCircle = (Circle) nodemap.get(graphEdge.getTail());
-                        Shape newarc = constructArrow(oCircle.getCenterX(), oCircle.getCenterY(),
-                                tCircle.getCenterX(), tCircle.getCenterY(), true, graphEdge.getWeight());
-                        attachEdgeHandler(newarc, graphEdge);
-                        edgemap.replace(graphEdge, newarc);
-                        workingField.getChildren().add(newarc);
+                        Text oldText = arc.getWeightText();
+                        workingField.getChildren().remove(oldText); //remove old arc from gui
+                        arc.setWeightText(w); //set new text
+                        workingField.getChildren().add(arc.getWeightText()); //add new text
                     }
                     else {
                         return;
@@ -325,7 +312,10 @@ public class Controller extends BaseController{
                 }
                 mouseEvent.consume();
             }
-        });
+        };
+        for (Shape s : arc.getAllElements()){
+            s.setOnMouseClicked(handler);
+        }
     }
 
 

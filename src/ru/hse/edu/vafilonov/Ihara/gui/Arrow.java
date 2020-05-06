@@ -6,7 +6,6 @@ import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,7 +34,7 @@ public class Arrow {
         x2 -= (nodeRadius + 2) * vectorX;
         y2 -= (nodeRadius + 2) * vectorY;
         mainLine = new Line(x1, y1, x2, y2);
-        mainLine.setStrokeWidth(2.5);
+        mainLine.setStrokeWidth(3);
         double xWproj = -arrowWing * vectorX;
         double yWproj = -arrowWing * vectorY;
         double x = xWproj * cosWing - yWproj * sinWing;
@@ -70,11 +69,13 @@ public class Arrow {
     }
 
     public void setWeightText(double weight){
+        var handler = weightText.getOnMouseClicked();
         boolean visibility = weightText.isVisible();
         weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2., String.format("%.3f", weight));
         weightText.setFont(new Font(15));
         weightText.setFill(Color.BLUE);
         weightText.setVisible(visibility);
+        weightText.setOnMouseClicked(handler);
     }
 
     public Line getMainLine(){

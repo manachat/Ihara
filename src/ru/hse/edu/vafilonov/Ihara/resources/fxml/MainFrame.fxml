@@ -15,7 +15,7 @@
           xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10" gridLinesVisible="true" >
     <AnchorPane fx:id="workingField"  GridPane.columnIndex="0" prefWidth="800" prefHeight="700"
                 onMouseClicked="#workingFieldClickHandler" />
-    <VBox GridPane.columnIndex="1" prefWidth="400">
+    <VBox fx:id="controlBox" GridPane.columnIndex="1" prefWidth="400">
         <HBox>
             <Label text="Re: "/>
             <TextField fx:id="reText" />
@@ -32,7 +32,7 @@
             <Label text="Function: "/>
             <ComboBox fx:id="functionComboBox"/>
         </HBox>
-        <Button fx:id="calculateButton" text="calculate" onMouseClicked="#fireButtonClickHandler"/>
+        <Button fx:id="calculateButton" text="calculate" onMouseClicked="#calculateButtonClickHandler"/>
     </VBox>
 
 
