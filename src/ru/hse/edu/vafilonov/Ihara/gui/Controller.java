@@ -49,8 +49,12 @@ public class Controller extends BaseController{
         model = new GraphModel();
         workingField.setMaxHeight(screenSize.getHeight());
         workingField.setPrefHeight(screenSize.getHeight());
+        workingField.setMaxWidth(screenSize.getWidth());
+        workingField.setPrefWidth(screenSize.getWidth() * 3 / 8);
         controlBox.setMaxHeight(screenSize.getHeight());
         controlBox.setPrefHeight(screenSize.getHeight());
+        controlBox.setMaxWidth(screenSize.getWidth());
+        controlBox.setPrefWidth(screenSize.getWidth() / 8.);
         /*
         listener for value of selected function
         changes shape of arrows according to function type

@@ -22,7 +22,7 @@ public class Main extends Application {
 
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("resources/fxml/MainFrame.fxml"));
-        AnchorPane root = loader.load();
+        Parent root = loader.load();
 
         primaryStage.setTitle("Ihara calculator(name temporary)");
         Scene scene = new Scene(root, screenSize.width / 2.0, screenSize.height / 2.0);
