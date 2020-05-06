@@ -13,9 +13,9 @@
 <?import javafx.collections.FXCollections?>
 <GridPane fx:controller="ru.hse.edu.vafilonov.Ihara.gui.Controller"
           xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10" gridLinesVisible="true" >
-    <AnchorPane fx:id="workingField"  GridPane.columnIndex="0" prefWidth="1000" prefHeight="700"
+    <AnchorPane fx:id="workingField"  GridPane.columnIndex="0" prefWidth="800" prefHeight="700"
                 onMouseClicked="#workingFieldClickHandler" />
-    <VBox GridPane.columnIndex="1">
+    <VBox GridPane.columnIndex="1" prefWidth="400">
         <HBox>
             <Label text="Re: "/>
             <TextField fx:id="reText" />
@@ -25,22 +25,14 @@
             <TextField fx:id="imText" text="0.0"/>
         </HBox>
         <HBox>
-            <Label text="Hashimoto: "/>
-            <Label fx:id="hashimotoLabel"/>
-        </HBox>
-        <HBox>
-            <Label text="Mizuno, Sato: "/>
-            <Label fx:id="mizunosatoLabel"/>
+            <Label text="Result: "/>
+            <Label fx:id="resultLabel"/>
         </HBox>
         <HBox>
             <Label text="Function: "/>
             <ComboBox fx:id="functionComboBox"/>
         </HBox>
-        <HBox>
-            <Label text="Bass: "/>
-            <Label fx:id="bassLabel"/>
-        </HBox>
-        <Button fx:id="fireButton" text="calculate" onMouseClicked="#fireButtonClickHandler"/>
+        <Button fx:id="calculateButton" text="calculate" onMouseClicked="#fireButtonClickHandler"/>
     </VBox>
 
 

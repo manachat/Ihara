@@ -8,8 +8,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 public class GraphModel {
 
@@ -44,7 +46,6 @@ public class GraphModel {
                 e.getTail().disconnect(e);
             }
         }
-        node.deleteElement();
         //remove vertical connections
         graphEdges.removeAll(adjacentEdges);
         graphNodes.remove(node);
@@ -58,12 +59,45 @@ public class GraphModel {
         //remove vertical connection
         graphEdges.remove(edge);
     }
-    /*
-    public boolean checkConnectivity(){
+
+    /**
+     * Checks connectivity of graph
+     * @return true for connected graph
+     * @throws IllegalStateException
+     */
+    public boolean checkConnectivity() throws IllegalStateException{
         //TODO: implement BFS/DFS
+        if (graphNodes.isEmpty()){
+            throw new IllegalStateException("Граф пуст");
+        }
+        ArrayDeque<GraphNode> traversalQueue = new ArrayDeque<>();
+        traversalQueue.addLast(graphNodes.get(0));
+        graphNodes.get(0).setColor(1); //mark grey
+        GraphNode current;
+        while (!traversalQueue.isEmpty()){
+            current = traversalQueue.getFirst();
+            for (GraphEdge e : current.getConnections()){
+                GraphNode adjacent = e.getOrigin() == current ? e.getTail() : e.getOrigin(); //take adjacent node
+                if (adjacent.getColor() == 0){ //paint white node grey and add to queue
+                    traversalQueue.addLast(adjacent);
+                    adjacent.setColor(1);
+                }
+            }
+            //paint node black and remove from queue
+            current.setColor(2);
+            traversalQueue.removeFirst();
+        }
+        boolean allBlack = true;
+        for (GraphNode n : graphNodes){
+            if (n.getColor() == 0){
+                allBlack = false;
+            }
+            n.setColor(0); //return nodes to white color
+        }
+        return allBlack;
     }
 
-     */
+
 
     /**
      * helper method
@@ -78,9 +112,12 @@ public class GraphModel {
         }
     }
 
-    //-----------------------------------------------------FORMULAS-------------------------------------
+    //-----------------------------------------------------FORMULAS--------------------------------------------------//
 
-    public ComplexNumber calculateZetaTheoremOneA(ComplexNumber u){
+    public ComplexNumber calculateZetaTheoremOneA(ComplexNumber u) throws IllegalStateException{
+        if (graphEdges.size() == 0){
+            throw new IllegalStateException("Отсутствуют ребра");
+        }
         ComplexMatrix id = ComplexMatrix.getIdentityMatrix(graphEdges.size()*2); //I
         ComplexMatrix edgeMatrix = constructEdgeMatrix();
         ComplexMatrix multipliedEdgeMatrix = edgeMatrix.scalarMult(u.getAddInverse()); // -u(B-J)
@@ -88,7 +125,10 @@ public class GraphModel {
         return resultMatrix.getDeterminant();
     }
 
-    public ComplexNumber calculateZetaTheoremOneB(ComplexNumber u) throws ArithmeticException {
+    public ComplexNumber calculateZetaTheoremOneB(ComplexNumber u) throws IllegalStateException{
+        if (graphNodes.size() == 0){
+            throw new IllegalStateException("Отсутствуют узлы.");
+        }
         if (u.equals(ComplexNumber.getMultId())){
             return ComplexNumber.getAddId();
         }
@@ -109,12 +149,15 @@ public class GraphModel {
     }
 
     //TODO убрать дефолтный нулевой вес, сделать проверку на веса (нулевые или отсутствие)
-    public ComplexNumber calculateZetaTheoremThree(ComplexNumber u) throws ArithmeticException{
+    public ComplexNumber calculateZetaTheoremThree(ComplexNumber u) throws ArithmeticException, IllegalStateException{
+        if (graphNodes.size() == 0){
+            throw new IllegalStateException("Отсутствуют узлы.");
+        }
+        checkWeights();
+
         if (u.equals(ComplexNumber.getMultId())){
             return ComplexNumber.getAddId();
         }
-
-        checkWeights();
 
         ComplexMatrix id = ComplexMatrix.getIdentityMatrix(graphNodes.size());
         ComplexMatrix adjacency = constructWeightedAdjacencyMatrix();

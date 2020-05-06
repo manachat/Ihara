@@ -9,9 +9,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Shape;
+import javafx.scene.shape.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,16 +33,10 @@ public class Controller extends BaseController{
     private TextField imText;
 
     @FXML
-    private Label hashimotoLabel;
+    private Label resultLabel;
 
     @FXML
-    private Label bassLabel;
-
-    @FXML
-    private Label mizunosatoLabel;
-
-    @FXML
-    private Button fireButton;
+    private Button calculateButton;
 
     @FXML
     private ComboBox<String> functionComboBox;
@@ -67,34 +59,48 @@ public class Controller extends BaseController{
             msg.show();
             return;
         }
+
         double re;
         double im;
+
         try {
             re = Double.parseDouble(reText.getText());
             im = Double.parseDouble(imText.getText());
+            if (!model.checkConnectivity()){
+                Alert msg = new Alert(Alert.AlertType.ERROR, "Граф должен быть связным.", ButtonType.OK);
+                msg.setTitle("Внимание");
+                msg.setHeaderText(null);
+                msg.setGraphic(null);
+                msg.show();
+                return;
+            }
         }
-        catch (NumberFormatException nex){
-            Alert msg = new Alert(Alert.AlertType.ERROR, "Некорректный ввод", ButtonType.OK);
+        catch (NumberFormatException | IllegalStateException nex){
+            Alert msg;
+            if (nex instanceof NumberFormatException) {
+                msg = new Alert(Alert.AlertType.ERROR, "Некорректный ввод", ButtonType.OK);
+            }
+            else {
+                msg = new Alert(Alert.AlertType.ERROR, nex.getMessage(), ButtonType.OK);
+            }
             msg.setTitle("Error");
             msg.setHeaderText(null);
             msg.setGraphic(null);
             msg.show();
             return;
         }
-        ComplexNumber res;
+
+        ComplexNumber res = null;
         switch (functionComboBox.getValue()){
             case functionHashimoto:
                 res = model.calculateZetaTheoremOneA(new ComplexNumber(re, im));
-                hashimotoLabel.setText(res.toString());
                 break;
             case functionBass:
                 res = model.calculateZetaTheoremOneB(new ComplexNumber(re, im));
-                bassLabel.setText(res.toString());
                 break;
             case functionMizunoSato:
                 try {
                     res = model.calculateZetaTheoremThree(new ComplexNumber(re, im));
-                    mizunosatoLabel.setText(res.toString());
                 }
                 catch (ArithmeticException arex){
                     Alert msg = new Alert(Alert.AlertType.ERROR, arex.getMessage(), ButtonType.OK);
@@ -106,6 +112,7 @@ public class Controller extends BaseController{
                 }
                 break;
         }
+        resultLabel.setText(res.toString());
     }
 
     @FXML
@@ -192,6 +199,7 @@ public class Controller extends BaseController{
             Text weight = new Text((x1 + x2)/2., (y1 + y2)/2., String.format("%.3f", value));
             weight.setFont(new Font(20));
             Shape arrow = Shape.union(mainLine, Shape.union(firstwing, secondwing));
+            List<PathElement> els = ((Path)arrow).getElements();
             return Shape.union(arrow, weight);
         }
         else{
