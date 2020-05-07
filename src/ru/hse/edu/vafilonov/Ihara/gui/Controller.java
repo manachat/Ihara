@@ -48,12 +48,8 @@ public class Controller extends BaseController{
         functionComboBox.getItems().addAll(functionHashimoto, functionBass, functionMizunoSato);
         functionComboBox.setValue(functionHashimoto);
         model = new GraphModel();
-        workingField.setMaxHeight(screenSize.getHeight());
-        workingField.setPrefHeight(screenSize.getHeight());
         workingField.setMaxWidth(screenSize.getWidth());
         workingField.setPrefWidth(screenSize.getWidth() * 3 / 8);
-        controlBox.setMaxHeight(screenSize.getHeight());
-        controlBox.setPrefHeight(screenSize.getHeight());
         controlBox.setMaxWidth(screenSize.getWidth());
         controlBox.setPrefWidth(screenSize.getWidth() / 8.);
     }
@@ -85,6 +81,12 @@ public class Controller extends BaseController{
             double newWidth = scene.getWidth();
             workingField.setPrefWidth(newWidth * 3 / 4);
             controlBox.setPrefWidth(newWidth / 4);
+        });
+
+        scene.heightProperty().addListener(property -> {
+            double newHeight = screenSize.getHeight();
+            workingField.setPrefHeight(newHeight - menuBarHeight);
+            controlBox.setPrefHeight(newHeight - menuBarHeight);
         });
     }
 
@@ -183,9 +185,7 @@ public class Controller extends BaseController{
     private GraphNode selectedNode;
 
     private final double nodeRadius = 7.5;
-    private final double arrowWing = 10;
-    private final double cosWing = Math.cos(Math.PI / 12);
-    private final double sinWing = Math.sin(Math.PI / 12);
+    private final double menuBarHeight = 30;
     private final String functionHashimoto = "Hashimoto";
     private final String functionBass = "Bass";
     private final String functionMizunoSato = "Mizuno,Sato";

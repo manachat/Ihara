@@ -4,7 +4,9 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -14,12 +16,31 @@
 <?import javafx.scene.text.Font?>
 
 <GridPane alignment="center" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.hse.edu.vafilonov.Ihara.gui.Controller">
-    <AnchorPane fx:id="workingField" onMouseClicked="#workingFieldClickHandler" prefHeight="700" prefWidth="800" style="-fx-background-color: white;" GridPane.columnIndex="0">
+   <MenuBar prefHeight="25.0" GridPane.columnSpan="2">
+     <menus>
+       <Menu mnemonicParsing="false" text="File">
+         <items>
+           <MenuItem mnemonicParsing="false" text="Close" />
+         </items>
+       </Menu>
+       <Menu mnemonicParsing="false" text="Edit">
+         <items>
+           <MenuItem mnemonicParsing="false" text="Delete" />
+         </items>
+       </Menu>
+         <Menu mnemonicParsing="false" text="Unspecified Menu">
+           <items>
+             <MenuItem mnemonicParsing="false" text="Action 1" />
+           </items>
+         </Menu>
+       <Menu mnemonicParsing="false" text="О разработчике" />
+     </menus>
+   </MenuBar>
+    <AnchorPane fx:id="workingField" onMouseClicked="#workingFieldClickHandler" prefWidth="800" style="-fx-background-color: white;" GridPane.columnIndex="0" GridPane.rowIndex="1">
       <GridPane.margin>
-         <Insets bottom="20.0" left="20.0" top="20.0" />
+         <Insets left="20.0" right="10.0" />
       </GridPane.margin></AnchorPane>
-   <Separator orientation="VERTICAL" prefHeight="200.0" GridPane.columnIndex="1" />
-    <VBox fx:id="controlBox" prefWidth="400" style="-fx-background-color: white;" GridPane.columnIndex="2">
+    <VBox fx:id="controlBox" prefWidth="400" style="-fx-background-color: white;" GridPane.columnIndex="1" GridPane.rowIndex="1">
         <Label text="Re: ">
             <VBox.margin>
                 <Insets bottom="10.0" left="10.0" top="10.0" />
@@ -79,7 +100,7 @@
 
         <Button fx:id="help" text="Справка">
             <VBox.margin>
-                <Insets top="50"/>
+                <Insets top="50" />
             </VBox.margin>
             <font>
                 <Font name="Calibri" size="15.0" />
@@ -87,7 +108,7 @@
         </Button>
 
         <GridPane.margin>
-            <Insets bottom="20.0" right="20.0" top="20.0" />
+            <Insets right="20.0" />
         </GridPane.margin>
         <opaqueInsets>
             <Insets />
@@ -97,11 +118,11 @@
    <columnConstraints>
       <ColumnConstraints />
       <ColumnConstraints />
-      <ColumnConstraints />
    </columnConstraints>
 
    <rowConstraints>
-      <RowConstraints />
+       <RowConstraints />
+       <RowConstraints />
    </rowConstraints>
 
 </GridPane>
