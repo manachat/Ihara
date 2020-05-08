@@ -19,21 +19,18 @@
    <MenuBar prefHeight="25.0" GridPane.columnSpan="2">
      <menus>
        <Menu mnemonicParsing="false" text="File">
-         <items>
-           <MenuItem mnemonicParsing="false" text="Close" />
-         </items>
+            <items>
+                <MenuItem fx:id="saveMenu" mnemonicParsing="false" text="Save" onAction="#saveMenuHandler"/>
+                <MenuItem fx:id="saveAsMenu" mnemonicParsing="false" text="Save as..." onAction="#saveAsMenuHandler" />
+                <MenuItem fx:id="loadMenu" mnemonicParsing="false" text="Load" onAction="#loadMenuhandler" />
+            </items>
        </Menu>
-       <Menu mnemonicParsing="false" text="Edit">
-         <items>
-           <MenuItem mnemonicParsing="false" text="Delete" />
-         </items>
-       </Menu>
-         <Menu mnemonicParsing="false" text="Unspecified Menu">
-           <items>
-             <MenuItem mnemonicParsing="false" text="Action 1" />
-           </items>
+         <Menu mnemonicParsing="false" text="Help">
+            <items>
+               <MenuItem fx:id="infoMenu" mnemonicParsing="false" text="Справка" />
+               <MenuItem fx:id="aboutMenu" mnemonicParsing="false" text="О разработчике" />
+            </items>
          </Menu>
-       <Menu mnemonicParsing="false" text="О разработчике" />
      </menus>
    </MenuBar>
     <AnchorPane fx:id="workingField" onMouseClicked="#workingFieldClickHandler" prefWidth="800" style="-fx-background-color: white;" GridPane.columnIndex="0" GridPane.rowIndex="1">
@@ -97,15 +94,6 @@
                 <Insets left="5.0" />
             </VBox.margin>
         </Label>
-
-        <Button fx:id="help" text="Справка">
-            <VBox.margin>
-                <Insets top="50" />
-            </VBox.margin>
-            <font>
-                <Font name="Calibri" size="15.0" />
-            </font>
-        </Button>
 
         <GridPane.margin>
             <Insets right="20.0" />

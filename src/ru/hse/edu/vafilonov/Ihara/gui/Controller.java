@@ -1,5 +1,6 @@
 package ru.hse.edu.vafilonov.Ihara.gui;
 
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -13,35 +14,57 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 
+import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import ru.hse.edu.vafilonov.Ihara.model.*;
 
 public class Controller extends BaseController{
     @FXML
     private AnchorPane workingField;
-
     @FXML
     private VBox controlBox;
-
     @FXML
     private TextField reText;
-
     @FXML
     private TextField imText;
-
     @FXML
     private Label resultLabel;
-
     @FXML
     private Button calculateButton;
-
     @FXML
     private ComboBox<String> functionComboBox;
+    @FXML
+    private MenuItem saveAsMenu;
+    @FXML
+    private MenuItem saveMenu;
+    @FXML
+    private MenuItem loadMenu;
+    @FXML
+    private MenuItem infoMenu;
+    @FXML
+    private MenuItem aboutMenu;
+
+    private boolean isNodeSelected = false;
+    private GraphNode selectedNode;
+    private String filepath = null;
+
+    private final double nodeRadius = 7.5;
+    private final double menuBarHeight = 30;
+    private final String functionHashimoto = "Hashimoto";
+    private final String functionBass = "Bass";
+    private final String functionMizunoSato = "Mizuno, Sato";
+    private Paint nodeColor = Color.RED;
+
+    private HashMap<GraphNode, Shape> nodemap = new HashMap<>();
+    private HashMap<GraphEdge, Arrow> edgemap = new HashMap<>();
+    private GraphModel model;
 
     @FXML
     public void initialize(){
@@ -168,7 +191,7 @@ public class Controller extends BaseController{
         else { //create new node
             double x = e.getX();
             double y = e.getY();
-            GraphNode graphNode = new GraphNode();
+            GraphNode graphNode = model.addNode();
             Circle c = new Circle(x, y, nodeRadius, nodeColor);
 
             //--------------------------------------------------------------------------------
@@ -176,24 +199,42 @@ public class Controller extends BaseController{
             //-------------------------------------------------------------------------------------------------
 
             nodemap.put(graphNode, c); //connect node with GUI via hashmap
-            model.addNode(graphNode); //add node to graph
             workingField.getChildren().add(c); //add visualisations to display
         }
     }
 
-    private boolean isNodeSelected = false;
-    private GraphNode selectedNode;
+    @FXML
+    private void saveMenuHandler(ActionEvent event){
+        if (filepath != null){
+            saveSession(filepath);
+        }
+        else {
+            saveAsMenuHandler(null);
+        }
+    }
 
-    private final double nodeRadius = 7.5;
-    private final double menuBarHeight = 30;
-    private final String functionHashimoto = "Hashimoto";
-    private final String functionBass = "Bass";
-    private final String functionMizunoSato = "Mizuno,Sato";
-    private Paint nodeColor = Color.RED;
+    @FXML
+    private void saveAsMenuHandler(ActionEvent event){
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Save session");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IHR", "*.ihr"));
+        File path = chooser.showSaveDialog(scene.getWindow());
+        if (path != null){
+            saveSession(path.getPath());
+            filepath = path.getPath();
+        }
+    }
 
-    private HashMap<GraphNode, Shape> nodemap = new HashMap<>();
-    private HashMap<GraphEdge, Arrow> edgemap = new HashMap<>();
-    private GraphModel model;
+    @FXML
+    private void loadMenuhandler(ActionEvent event){
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Save session");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IHR", "*.ihr"));
+        File path = chooser.showOpenDialog(scene.getWindow());
+        if (path != null){
+            readSession(path.getPath());
+        }
+    }
 
     private void deleteNode(GraphNode node){
         Shape figure = nodemap.remove(node); //remove from map
@@ -244,7 +285,7 @@ public class Controller extends BaseController{
                                 //CREATE EDGE
                                 GraphNode origin = selectedNode;
                                 GraphNode tail = graphNode;
-                                GraphEdge graphEdge = new GraphEdge(origin, tail);
+                                GraphEdge graphEdge = model.addEdge(origin, tail);
                                 Circle oCircle = (Circle) nodemap.get(origin);
                                 Circle tCircle = (Circle) nodemap.get(tail);
                                 Arrow arc;
@@ -262,7 +303,6 @@ public class Controller extends BaseController{
                                 //--------------------------------------------------------------------------
 
                                 workingField.getChildren().addAll(arc.getAllElements());
-                                model.addEdge(graphEdge);
                                 edgemap.put(graphEdge, arc);
                             }
                             else{ //connection already exists
@@ -332,6 +372,86 @@ public class Controller extends BaseController{
         };
         for (Shape s : arc.getAllElements()){
             s.setOnMouseClicked(handler);
+        }
+    }
+
+    private void saveSession(String path){
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path))){
+            List<Arrow> savedArrows = new ArrayList<>(edgemap.size());
+            for (GraphEdge e : model.getGraphEdges()) {
+                savedArrows.add(edgemap.get(e));
+            }
+            double[] xs = new double[nodemap.size()];
+            double[] ys = new double[nodemap.size()];
+            int index = 0;
+            for (GraphNode n : model.getGraphNodes()) {
+                Circle c = (Circle) nodemap.get(n);
+                xs[index] = c.getCenterX();
+                ys[index] = c.getCenterY();
+                index++;
+            }
+            SavedSession session = new SavedSession(model, savedArrows, xs, ys);
+            oos.writeObject(session);
+        }
+        catch (IOException ioex){
+            Alert msg = new Alert(Alert.AlertType.ERROR, "Не удалось сохранить сессию.", ButtonType.OK);
+            msg.setTitle("Ошибка!");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+        }
+    }
+
+    private void readSession(String path){
+        SavedSession session;
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))){
+            session = (SavedSession) ois.readObject();
+            GraphModel model = session.getModel();
+            List<Arrow> arrows = session.getArrows();
+            double[] xs = session.getCircleX();
+            double[] ys = session.getCircleY();
+            this.model = model;
+            workingField.getChildren().clear();
+
+            nodemap.clear();
+            int index = 0;
+            for (GraphNode n : model.getGraphNodes()){
+                Circle c = new Circle(xs[index], ys[index], nodeRadius, nodeColor);
+                attachNodeHandler(c, n);
+                workingField.getChildren().add(c);
+                nodemap.put(n, c);
+                index++;
+            }
+
+            edgemap.clear();
+            index = 0;
+            for (GraphEdge e : model.getGraphEdges()){
+                Arrow arc = arrows.get(index);
+                if (functionComboBox.getValue().equals(functionMizunoSato)) {
+                    arc.reinitialize(nodeRadius, true);
+                }
+                else {
+                    arc.reinitialize(nodeRadius, false);
+                }
+                attachEdgeHandler(arc, e);
+                workingField.getChildren().addAll(arc.getAllElements());
+                edgemap.put(e, arc);
+                index++;
+            }
+        }
+        catch (ClassNotFoundException cnfex){
+            Alert msg = new Alert(Alert.AlertType.ERROR, "Не найден ", ButtonType.OK);
+            msg.setTitle("Ошибка!");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+        }
+        catch (IOException ioex){
+            Alert msg = new Alert(Alert.AlertType.ERROR, "Не удалось прочитать файл сессии.", ButtonType.OK);
+            msg.setTitle("Ошибка!");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
         }
     }
 

@@ -8,12 +8,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
+import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
-public class GraphModel {
+public class GraphModel implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private List<GraphNode> graphNodes = new ArrayList<>(10);
     private List<GraphEdge> graphEdges = new ArrayList<>(10);
@@ -25,20 +27,24 @@ public class GraphModel {
 
     /**
      * Adds node to graph
-     * @param node added node
+     * @return created node
      */
-    public void addNode(GraphNode node){
+    public GraphNode addNode(){
+        GraphNode node = new GraphNode();
         graphNodes.add(node);
+        return node;
     }
 
     /**
      * Adds edge to graph
-     * @param edge added edge
+     * @return created edge
      */
-    public void addEdge(GraphEdge edge){
+    public GraphEdge addEdge(GraphNode origin, GraphNode tail){
+        GraphEdge edge = new GraphEdge(origin, tail);
         graphEdges.add(edge);
-        edge.getOrigin().connect(edge);
-        edge.getTail().connect(edge);
+        origin.connect(edge);
+        tail.connect(edge);
+        return edge;
     }
 
     /**
@@ -89,7 +95,6 @@ public class GraphModel {
      * @throws IllegalStateException
      */
     public boolean checkConnectivity() throws IllegalStateException{
-        //TODO: implement BFS/DFS
         if (graphNodes.isEmpty()){
             throw new IllegalStateException("Граф пуст");
         }

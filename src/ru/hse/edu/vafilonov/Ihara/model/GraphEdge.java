@@ -1,6 +1,10 @@
 package ru.hse.edu.vafilonov.Ihara.model;
 
-public class GraphEdge extends AbstractGraphElement {
+import java.io.Serializable;
+
+public class GraphEdge extends AbstractGraphElement implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private GraphNode origin;
     private GraphNode tail;
     private double weight = 0.0;

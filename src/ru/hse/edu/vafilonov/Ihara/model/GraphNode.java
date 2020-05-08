@@ -3,11 +3,13 @@ package ru.hse.edu.vafilonov.Ihara.model;
 import javafx.scene.Node;
 import javafx.scene.shape.Shape;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class GraphNode extends AbstractGraphElement {
+public class GraphNode extends AbstractGraphElement implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private List<GraphEdge> connections = new ArrayList<>(10);
 
