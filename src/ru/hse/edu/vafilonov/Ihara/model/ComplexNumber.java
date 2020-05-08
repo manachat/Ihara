@@ -121,25 +121,49 @@ public final class ComplexNumber extends Number{
 
     @Override
     public String toString(){
+        return accurateToString(3);
+    }
+
+    public String accurateToString(int accuracy){
+        String format, res;
+        if (accuracy <= 0){
+            format = "%f";
+        }
+        else {
+            format = "%." + accuracy + "f";
+        }
+
         StringBuilder builder = new StringBuilder();
         if (re != 0.0){
-            builder.append(String.format("%.4f", re));
+            builder.append(format);
             if (im > 0.0){
-                builder.append(String.format(" + i%.3f", im));
+                builder.append(" + i");
             }
             else if (im < 0.0){
-                builder.append(String.format(" - i%.3f", Math.abs(im)));
+                builder.append(" - i");
+            }
+
+            if (im != 0.0){
+                builder.append(format);
+                res = String.format(builder.toString(), re, im);
+            }
+            else {
+                res = String.format(builder.toString(), re);
             }
         }
         else {
             if (im > 0.0){
-                builder.append(String.format(" + i%.3f", im));
+                builder.append("i");
+                builder.append(format);
+                res = String.format(builder.toString(), im);
             }
             else if (im < 0.0){
-                builder.append(String.format("-i%.3f", Math.abs(im)));
+                builder.append("-i");
+                builder.append(format);
+                res = String.format(builder.toString(), im);
             }
             else return "0.0";
         }
-        return builder.toString();
+        return res;
     }
 }

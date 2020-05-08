@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -20,20 +21,20 @@
      <menus>
        <Menu mnemonicParsing="false" text="File">
             <items>
-                <MenuItem fx:id="saveMenu" mnemonicParsing="false" text="Save" onAction="#saveMenuHandler"/>
-                <MenuItem fx:id="saveAsMenu" mnemonicParsing="false" text="Save as..." onAction="#saveAsMenuHandler" />
-                <MenuItem fx:id="loadMenu" mnemonicParsing="false" text="Load" onAction="#loadMenuhandler" />
+                <MenuItem fx:id="saveMenu" mnemonicParsing="false" onAction="#saveMenuHandler" text="Save" />
+                <MenuItem fx:id="saveAsMenu" mnemonicParsing="false" onAction="#saveAsMenuHandler" text="Save as..." />
+                <MenuItem fx:id="loadMenu" mnemonicParsing="false" onAction="#loadMenuHandler" text="Load" />
             </items>
        </Menu>
          <Menu mnemonicParsing="false" text="Help">
             <items>
                <MenuItem fx:id="infoMenu" mnemonicParsing="false" text="Справка" />
-               <MenuItem fx:id="aboutMenu" mnemonicParsing="false" text="О разработчике" />
+               <MenuItem fx:id="aboutMenu" mnemonicParsing="false" onAction="#aboutMenuHandler" text="О разработчике" />
             </items>
          </Menu>
      </menus>
    </MenuBar>
-    <AnchorPane fx:id="workingField" onMouseClicked="#workingFieldClickHandler" prefWidth="800" style="-fx-background-color: white;" GridPane.columnIndex="0" GridPane.rowIndex="1">
+    <AnchorPane fx:id="workingField" onMouseClicked="#workingFieldClickHandler" prefWidth="800" style="-fx-background-color: white;" GridPane.rowIndex="1">
       <GridPane.margin>
          <Insets left="20.0" right="10.0" />
       </GridPane.margin></AnchorPane>
@@ -82,6 +83,19 @@
                 <Font name="Calibri" size="15.0" />
             </font>
         </Button>
+      <HBox>
+         <children>
+            <Label text="Точность:">
+               <HBox.margin>
+                  <Insets right="10.0" />
+               </HBox.margin>
+            </Label>
+            <TextField fx:id="accuracyField"/>
+         </children>
+         <VBox.margin>
+            <Insets bottom="10.0" left="5.0" />
+         </VBox.margin>
+      </HBox>
 
         <Label text="Результат: ">
             <VBox.margin>
@@ -89,11 +103,11 @@
             </VBox.margin>
         </Label>
 
-        <Label fx:id="resultLabel">
+        <TextField fx:id="resultField">
             <VBox.margin>
                 <Insets left="5.0" />
             </VBox.margin>
-        </Label>
+        </TextField>
 
         <GridPane.margin>
             <Insets right="20.0" />

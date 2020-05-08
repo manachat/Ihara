@@ -3,8 +3,6 @@ package ru.hse.edu.vafilonov.Ihara.gui;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.scene.canvas.*;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -35,7 +33,9 @@ public class Controller extends BaseController{
     @FXML
     private TextField imText;
     @FXML
-    private Label resultLabel;
+    private TextField accuracyField;
+    @FXML
+    private TextField resultField;
     @FXML
     private Button calculateButton;
     @FXML
@@ -60,6 +60,8 @@ public class Controller extends BaseController{
     private final String functionHashimoto = "Hashimoto";
     private final String functionBass = "Bass";
     private final String functionMizunoSato = "Mizuno, Sato";
+    private final String aboutString = "Программа разработана в рамках выполения курсовой работы ОП ПИ НИУ ВШЭ\n " +
+            "Исполнитель: \n Филонов Всеволод Андреевич\n группа БПИ185";
     private Paint nodeColor = Color.RED;
 
     private HashMap<GraphNode, Shape> nodemap = new HashMap<>();
@@ -73,8 +75,10 @@ public class Controller extends BaseController{
         model = new GraphModel();
         workingField.setMaxWidth(screenSize.getWidth());
         workingField.setPrefWidth(screenSize.getWidth() * 3 / 8);
+        workingField.setPrefHeight(screenSize.getHeight() / 2 - menuBarHeight);
         controlBox.setMaxWidth(screenSize.getWidth());
         controlBox.setPrefWidth(screenSize.getWidth() / 8.);
+        controlBox.setPrefHeight(screenSize.getHeight() / 2 - menuBarHeight);
     }
 
     public void setListeners(){
@@ -126,10 +130,17 @@ public class Controller extends BaseController{
 
         double re;
         double im;
+        int accuracy= -1;
 
         try {
             re = Double.parseDouble(reText.getText());
             im = Double.parseDouble(imText.getText());
+            if (!accuracyField.getText().isEmpty()){
+                accuracy = Integer.parseInt(accuracyField.getText());
+                if  (accuracy <= 0){
+                    throw new IllegalStateException("Точность должна быть положительной.");
+                }
+            }
             if (!model.checkConnectivity()){
                 Alert msg = new Alert(Alert.AlertType.ERROR, "Граф должен быть связным.", ButtonType.OK);
                 msg.setTitle("Внимание");
@@ -142,7 +153,7 @@ public class Controller extends BaseController{
         catch (NumberFormatException | IllegalStateException nex){
             Alert msg;
             if (nex instanceof NumberFormatException) {
-                msg = new Alert(Alert.AlertType.ERROR, "Некорректный ввод", ButtonType.OK);
+                msg = new Alert(Alert.AlertType.ERROR, "Некорректный ввод чисел", ButtonType.OK);
             }
             else {
                 msg = new Alert(Alert.AlertType.ERROR, nex.getMessage(), ButtonType.OK);
@@ -176,7 +187,7 @@ public class Controller extends BaseController{
                 }
                 break;
         }
-        resultLabel.setText(res.toString());
+        resultField.setText(res.accurateToString(accuracy));
     }
 
     @FXML
@@ -226,14 +237,29 @@ public class Controller extends BaseController{
     }
 
     @FXML
-    private void loadMenuhandler(ActionEvent event){
+    private void loadMenuHandler(ActionEvent event){
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Save session");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("IHR", "*.ihr"));
         File path = chooser.showOpenDialog(scene.getWindow());
         if (path != null){
             readSession(path.getPath());
+            filepath = path.getPath();
         }
+    }
+
+    @FXML
+    private void infoMenuHandler(ActionEvent event){
+
+    }
+
+    @FXML
+    private void aboutMenuHandler(ActionEvent event){
+        Alert msg = new Alert(Alert.AlertType.ERROR, aboutString, ButtonType.OK);
+        msg.setTitle("About");
+        msg.setHeaderText(null);
+        msg.setGraphic(null);
+        msg.show();
     }
 
     private void deleteNode(GraphNode node){
