@@ -1,29 +1,32 @@
-package ru.hse.edu.vafilonov.Ihara.model;
-
-import javafx.event.EventHandler;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
+package ru.hse.edu.vafilonov.ihara.model;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
+/**
+ * Represents Ihara graph model and methods
+ * for reverse Zeta function calculation
+ * @see java.io.Serializable
+ * @version 2
+ * @author Filonov Vsevolod
+ */
 public class GraphModel implements Serializable {
-    private static final long serialVersionUID = 1L;
+    /**
+     * serialization version identifier
+     */
+    private static final long serialVersionUID = 2L;
 
+    /**
+     * list of graph nodes
+     */
     private List<GraphNode> graphNodes = new ArrayList<>(10);
+
+    /**
+     * list of graph edges
+     */
     private List<GraphEdge> graphEdges = new ArrayList<>(10);
-
-
-    public GraphModel(){
-
-    }
 
     /**
      * Adds node to graph
@@ -54,12 +57,11 @@ public class GraphModel implements Serializable {
      */
     public void removeNode(GraphNode node){
         List<GraphEdge> adjacentEdges = node.getConnections();
-        //remove horisontal connections
-        for (GraphEdge e : adjacentEdges){ //disconnect other node, concurrent exc otherwise
+        // remove horizontal connections
+        for (GraphEdge e : adjacentEdges){ // disconnect other node, concurrent exc otherwise
             if (e.getOrigin() != node){
                 e.getOrigin().disconnect(e);
-            }
-            else {
+            } else {
                 e.getTail().disconnect(e);
             }
         }
@@ -72,7 +74,7 @@ public class GraphModel implements Serializable {
      * Disconnects edge and removes it from graph
      * @param edge removed edge
      */
-    public void removeEdge(GraphEdge edge){
+    public void removeEdge(GraphEdge edge) {
         //remove horizontal connections
         edge.getTail().disconnect(edge);
         edge.getOrigin().disconnect(edge);
@@ -91,13 +93,19 @@ public class GraphModel implements Serializable {
 
     /**
      * Checks connectivity of graph
+     * Method uses broad-first search to check connectivity
+     *         graph is not connected if white nodes are still present
+     *         after BFS
      * @return true for connected graph
-     * @throws IllegalStateException
+     * @throws IllegalStateException if there are no nodes in graph
      */
-    public boolean checkConnectivity() throws IllegalStateException{
+    public boolean checkConnectivity() throws IllegalStateException {
         if (graphNodes.isEmpty()){
             throw new IllegalStateException("Граф пуст");
         }
+        /*
+        BFS
+         */
         ArrayDeque<GraphNode> traversalQueue = new ArrayDeque<>();
         traversalQueue.addLast(graphNodes.get(0));
         graphNodes.get(0).setColor(1); //mark grey
@@ -116,12 +124,14 @@ public class GraphModel implements Serializable {
             traversalQueue.removeFirst();
         }
         boolean allBlack = true;
+        // look for white nodes
         for (GraphNode n : graphNodes){
             if (n.getColor() == 0){
                 allBlack = false;
             }
             n.setColor(0); //return nodes to white color
         }
+
         return allBlack;
     }
 
@@ -138,9 +148,17 @@ public class GraphModel implements Serializable {
         }
     }
 
-    //-----------------------------------------------------FORMULAS--------------------------------------------------//
+    /*
+    Zeta function Formulas
+     */
 
-    public ComplexNumber calculateZetaTheoremOneA(ComplexNumber u) throws IllegalStateException{
+    /**
+     * Calculates reverse Ihara Zeta function using Hashimoto formula
+     * @param u argument
+     * @return function value
+     * @throws IllegalStateException if there are no edges in graph
+     */
+    public ComplexNumber calculateZetaHashimoto(ComplexNumber u) throws IllegalStateException{
         if (graphEdges.size() == 0){
             throw new IllegalStateException("Отсутствуют ребра");
         }
@@ -151,11 +169,18 @@ public class GraphModel implements Serializable {
         return resultMatrix.getDeterminant();
     }
 
-    public ComplexNumber calculateZetaTheoremOneB(ComplexNumber u) throws IllegalStateException{
-        if (graphNodes.size() == 0){
+    /**
+     * Calculates reverse Ihara Zeta function using Bass formula
+     * @param u argument
+     * @return function value
+     * @throws IllegalStateException if there are no nodes in graph
+     */
+    public ComplexNumber calculateZetaBass(ComplexNumber u) throws IllegalStateException{
+        if (graphNodes.size() == 0) {
             throw new IllegalStateException("Отсутствуют узлы.");
         }
-        if (u.equals(ComplexNumber.getMultId())){
+
+        if (u.equals(ComplexNumber.getMultId())) {
             return ComplexNumber.getAddId();
         }
 
@@ -174,8 +199,14 @@ public class GraphModel implements Serializable {
         return ComplexNumber.multiply(coef, det);
     }
 
-    //TODO убрать дефолтный нулевой вес, сделать проверку на веса (нулевые или отсутствие)
-    public ComplexNumber calculateZetaTheoremThree(ComplexNumber u) throws ArithmeticException, IllegalStateException{
+    /**
+     * Calculates reverse weighted Ihara Zeta function using Mizuno and Sato formula
+     * @param u argument
+     * @return function value
+     * @throws ArithmeticException if there are zero weights in graph
+     * @throws IllegalStateException if there are no nodes in graph
+     */
+    public ComplexNumber calculateZetaMizunoSato(ComplexNumber u) throws ArithmeticException, IllegalStateException{
         if (graphNodes.size() == 0){
             throw new IllegalStateException("Отсутствуют узлы.");
         }
@@ -321,6 +352,13 @@ public class GraphModel implements Serializable {
         return new ComplexMatrix(carcass);
     }
 
+    /**
+     * Helper method
+     * adds two real-value square matrices
+     * @param a first arg
+     * @param b second arg
+     * @return sum
+     */
     private double[][] addMatrices(double[][] a, double[][] b){
         int n = a.length;
         double[][] res = new double[n][n];
@@ -331,5 +369,4 @@ public class GraphModel implements Serializable {
         }
         return res;
     }
-
 }

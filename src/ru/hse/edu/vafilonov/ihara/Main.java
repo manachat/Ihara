@@ -1,18 +1,15 @@
-package ru.hse.edu.vafilonov.Ihara;
+package ru.hse.edu.vafilonov.ihara;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
-import javafx.stage.StageStyle;
-import ru.hse.edu.vafilonov.Ihara.gui.*;
+import ru.hse.edu.vafilonov.ihara.gui.*;
 
 public class Main extends Application {
 
@@ -29,7 +26,7 @@ public class Main extends Application {
 
         primaryStage.setScene(scene);
         BaseController.setScene(scene);
-        ((Controller)loader.getController()).setListeners();
+        ((MainController)loader.getController()).setListeners();
 
 
         primaryStage.show();

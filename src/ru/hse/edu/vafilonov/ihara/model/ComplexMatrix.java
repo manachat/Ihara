@@ -1,49 +1,22 @@
-package ru.hse.edu.vafilonov.Ihara.model;
+package ru.hse.edu.vafilonov.ihara.model;
 
 /**
  * Class represents square matrix of complex numbers
  * and basic operations with them
  * @see ComplexNumber
+ * @version 2
+ * @author Filonov Vsevolod
  */
 public class ComplexMatrix{
+    /**
+     * matrix 2-dim array
+     */
     private final ComplexNumber[][] matrix;
 
-    private final int N;
-
     /**
-     * sums to complex matrices
-     * throws IllegalArgumentException if argument dimensions do not match
-     * @param a first arg
-     * @param b second arg
-     * @return sum of matrices
+     * matrix size
      */
-    public static ComplexMatrix sum(ComplexMatrix a, ComplexMatrix b){
-        if (a.N != b.N){
-            throw new IllegalArgumentException("Sizes do not match");
-        }
-        ComplexNumber[][] res = new ComplexNumber[a.N][a.N];
-        for (int i = 0; i < a.N; i++){
-            for (int j = 0; j < a.N; j++){
-                res[i][j] = ComplexNumber.sum(a.get(i, j), b.get(i, j));
-            }
-        }
-        return new ComplexMatrix(res);
-    }
-
-    /**
-     * Constructs identity complex matrix of given size
-     * @param size
-     * @return
-     */
-    public static ComplexMatrix getIdentityMatrix(int size){
-        double[][] carcass = new double[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                carcass[i][j] = i == j ? 1. : 0.;
-            }
-        }
-        return new ComplexMatrix(carcass);
-    }
+    private final int size;
 
     /**
      * Copy constructor
@@ -55,10 +28,10 @@ public class ComplexMatrix{
         if (matrix.length != matrix[0].length){
             throw new IllegalArgumentException("Non-square matrix");
         }
-        N = matrix.length;
-        this.matrix = new ComplexNumber[N][N];
-        for (int i = 0; i < N; i++){
-            for (int j = 0; j < N; j++){
+        size = matrix.length;
+        this.matrix = new ComplexNumber[size][size];
+        for (int i = 0; i < size; i++){
+            for (int j = 0; j < size; j++){
                 this.matrix[i][j] = matrix[i][j].copy();
             }
         }
@@ -73,20 +46,49 @@ public class ComplexMatrix{
         if (dmatrix.length != dmatrix[0].length){
             throw new IllegalArgumentException("Non-square matrix");
         }
-        N = dmatrix.length;
-        this.matrix = new ComplexNumber[N][N];
-        for (int i = 0; i < N; i++){
-            for (int j = 0; j < N; j++){
+        size = dmatrix.length;
+        this.matrix = new ComplexNumber[size][size];
+        for (int i = 0; i < size; i++){
+            for (int j = 0; j < size; j++){
                 this.matrix[i][j] = new ComplexNumber(dmatrix[i][j]);
             }
         }
     }
 
-    /*
-    public ComplexNumber[][] getMatrix(){
-        return matrix;
-    }
+    /**
+     * sums to complex matrices
+     * @exception  IllegalArgumentException if argument dimensions do not match
+     * @param a first arg
+     * @param b second arg
+     * @return sum of matrices
      */
+    public static ComplexMatrix sum(ComplexMatrix a, ComplexMatrix b){
+        if (a.size != b.size){
+            throw new IllegalArgumentException("Sizes do not match");
+        }
+        ComplexNumber[][] res = new ComplexNumber[a.size][a.size];
+        for (int i = 0; i < a.size; i++){
+            for (int j = 0; j < a.size; j++){
+                res[i][j] = ComplexNumber.sum(a.get(i, j), b.get(i, j));
+            }
+        }
+        return new ComplexMatrix(res);
+    }
+
+    /**
+     * Constructs identity complex matrix of given size
+     * @param size matrix size
+     * @return id matrix
+     */
+    public static ComplexMatrix getIdentityMatrix(int size){
+        double[][] carcass = new double[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                carcass[i][j] = i == j ? 1. : 0.;
+            }
+        }
+        return new ComplexMatrix(carcass);
+    }
 
     /**
      * returns copy of given element
@@ -104,9 +106,9 @@ public class ComplexMatrix{
      * @return multiplied matrix
      */
     public ComplexMatrix scalarMult(ComplexNumber coef){
-        ComplexNumber[][] res = new ComplexNumber[N][N];
-        for (int i = 0; i < N; i++){
-            for (int j = 0; j < N; j++){
+        ComplexNumber[][] res = new ComplexNumber[size][size];
+        for (int i = 0; i < size; i++){
+            for (int j = 0; j < size; j++){
                 res[i][j] = ComplexNumber.multiply(coef, matrix[i][j]);
             }
         }
@@ -118,9 +120,9 @@ public class ComplexMatrix{
      * @return determinant of matrix
      */
     public ComplexNumber getDeterminant(){
-        ComplexNumber[][] copy = new ComplexNumber[N][N]; //copy matrix due to it immutability
-        for (int i = 0; i < N; i++){
-            for (int j = 0; j < N; j++){
+        ComplexNumber[][] copy = new ComplexNumber[size][size]; //copy matrix due to it immutability
+        for (int i = 0; i < size; i++){
+            for (int j = 0; j < size; j++){
                 copy[i][j] = matrix[i][j].copy();
             }
         }
@@ -128,14 +130,14 @@ public class ComplexMatrix{
         ComplexNumber det = ComplexNumber.getMultId(); //result
         int swaps = 0; //number of row swaps
         //going down diagonal, search for leading element and reduce all the elements under the lead
-        for (int i = 0; i < N; i++){
+        for (int i = 0; i < size; i++){
             int leadRow = i; //row with lead element
             //going down the column until we find lead element
-            while (leadRow < N && copy[leadRow][i].equals(ComplexNumber.getAddId())){
+            while (leadRow < size && copy[leadRow][i].equals(ComplexNumber.getAddId())){
                 leadRow++;
             }
             //no lead element for current step was found => Rank < N => det == 0
-            if (leadRow == N){
+            if (leadRow == size){
                 return ComplexNumber.getAddId();
             }
             //elevate row with lead element to preserve triangle form
@@ -145,7 +147,7 @@ public class ComplexMatrix{
             }
             ComplexNumber lead = copy[i][i];
             ComplexNumber invLead = lead.getMultInverse();
-            for (int j = i + 1; j < N; j++){
+            for (int j = i + 1; j < size; j++){
                 ComplexNumber coefficient = ComplexNumber.multiply(copy[j][i], invLead); //c = m[j][i]/lead
                 addRow(copy, j, i, coefficient.getAddInverse()); // subtraction of row
             }
@@ -159,13 +161,13 @@ public class ComplexMatrix{
 
     /**
      * helper method
-     * switches two row of given matrix
+     * switches two rows of given matrix
      * @param matrix matrix to edit
      * @param i row index
      * @param j column index
      */
     private void switchRows(ComplexNumber[][] matrix, int i, int j){
-        for (int k = 0; k < N; k++){
+        for (int k = 0; k < size; k++){
             ComplexNumber temp = matrix[i][k];
             matrix[i][k] = matrix[j][k];
             matrix[i][k] = temp;
@@ -181,9 +183,8 @@ public class ComplexMatrix{
      * @param coef multiplicative coefficient
      */
     private void addRow(ComplexNumber[][] matrix, int target, int source, ComplexNumber coef){
-        for (int i = 0; i < N; i++){
+        for (int i = 0; i < size; i++){
             matrix[target][i] = ComplexNumber.sum(matrix[target][i], ComplexNumber.multiply(matrix[source][i], coef));
         }
     }
-
 }

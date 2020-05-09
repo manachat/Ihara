@@ -1,4 +1,4 @@
-package ru.hse.edu.vafilonov.Ihara.tests;
+package ru.hse.edu.vafilonov.ihara.tests;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.util.List;
 
-import ru.hse.edu.vafilonov.Ihara.model.*;
+import ru.hse.edu.vafilonov.ihara.model.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

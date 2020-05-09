@@ -1,8 +1,8 @@
-package ru.hse.edu.vafilonov.Ihara.tests;
+package ru.hse.edu.vafilonov.ihara.tests;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.hse.edu.vafilonov.Ihara.model.ComplexNumber;
+import ru.hse.edu.vafilonov.ihara.model.ComplexNumber;
 
 import static org.junit.jupiter.api.Assertions.*;
 

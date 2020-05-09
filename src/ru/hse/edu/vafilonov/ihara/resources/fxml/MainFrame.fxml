@@ -16,7 +16,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<GridPane alignment="center" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.hse.edu.vafilonov.Ihara.gui.Controller">
+<GridPane alignment="center" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="ru.hse.edu.vafilonov.ihara.gui.MainController">
    <MenuBar prefHeight="25.0" GridPane.columnSpan="2">
      <menus>
        <Menu mnemonicParsing="false" text="File">
