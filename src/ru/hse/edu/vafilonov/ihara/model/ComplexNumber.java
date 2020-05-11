@@ -225,7 +225,7 @@ public final class ComplexNumber extends Number{
 
             if (im != 0.0){
                 builder.append(format);
-                res = String.format(builder.toString(), re, im);
+                res = String.format(builder.toString(), re, Math.abs(im));
             }
             else {
                 res = String.format(builder.toString(), re);
@@ -236,13 +236,13 @@ public final class ComplexNumber extends Number{
                 builder.append("i");
                 builder.append(format);
                 res = String.format(builder.toString(), im);
-            }
-            else if (im < 0.0){
+            } else if (im < 0.0){
                 builder.append("-i");
                 builder.append(format);
                 res = String.format(builder.toString(), im);
+            } else {
+                return "0.0";
             }
-            else return "0.0";
         }
         return res;
     }

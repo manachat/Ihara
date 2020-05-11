@@ -29,7 +29,7 @@
        </Menu>
          <Menu mnemonicParsing="false" text="Help">
             <items>
-               <MenuItem fx:id="infoMenu" mnemonicParsing="false" text="Справка" />
+               <MenuItem fx:id="infoMenu" mnemonicParsing="false" onAction="#infoMenuHandler" text="Справка" />
                <MenuItem fx:id="aboutMenu" mnemonicParsing="false" onAction="#aboutMenuHandler" text="О разработчике" />
             </items>
          </Menu>
@@ -76,7 +76,20 @@
             </VBox.margin>
         </ComboBox>
 
-        <Button fx:id="calculateButton" onMouseClicked="#calculateButtonClickHandler" text="Calculate">
+        <Label text="Точность:">
+            <VBox.margin>
+                <Insets left="10.0" bottom="10"/>
+            </VBox.margin>
+        </Label>
+
+        <TextField fx:id="accuracyField">
+            <VBox.margin>
+                <Insets left="5" bottom="10"/>
+            </VBox.margin>
+        </TextField>
+
+
+        <Button fx:id="calculateButton" onMouseClicked="#calculateButtonClickHandler" text="Рассчитать">
             <VBox.margin>
                 <Insets bottom="10.0" left="5.0" />
             </VBox.margin>
@@ -84,19 +97,6 @@
                 <Font name="Calibri" size="15.0" />
             </font>
         </Button>
-      <HBox>
-         <children>
-            <Label text="Точность:">
-               <HBox.margin>
-                  <Insets right="10.0" />
-               </HBox.margin>
-            </Label>
-            <TextField fx:id="accuracyField"/>
-         </children>
-         <VBox.margin>
-            <Insets bottom="10.0" left="5.0" />
-         </VBox.margin>
-      </HBox>
 
         <Label text="Результат: ">
             <VBox.margin>

@@ -21,22 +21,22 @@ public class SavedSession implements Serializable {
     /**
      * model reference
      */
-    private final GraphModel MODEL;
+    private final GraphModel model;
 
     /**
      * saved arrows
      */
-    private final List<Arrow> ARROWS;
+    private final List<Arrow> arrows;
 
     /**
      * saved circle x-coords
      */
-    private final double[] CIRCLE_X;
+    private final double[] circleX;
 
     /**
      * saved circle y-coords
      */
-    private final double[] CIRCLE_Y;
+    private final double[] circleY;
 
     /**
      * Constructor. Creates session object
@@ -46,27 +46,27 @@ public class SavedSession implements Serializable {
      * @param circleY circle y coords
      */
     SavedSession(GraphModel model, List<Arrow> arrows, double[] circleX, double[] circleY){
-        this.MODEL = model;
-        this.ARROWS = arrows;
-        this.CIRCLE_X = circleX;
-        this.CIRCLE_Y = circleY;
+        this.model = model;
+        this.arrows = arrows;
+        this.circleX = circleX;
+        this.circleY = circleY;
     }
 
     /* getters for fields */
 
-    GraphModel getMODEL() {
-        return MODEL;
+    GraphModel getModel() {
+        return model;
     }
 
-    List<Arrow> getARROWS() {
-        return ARROWS;
+    List<Arrow> getArrows() {
+        return arrows;
     }
 
-    double[] getCIRCLE_X() {
-        return CIRCLE_X;
+    double[] getCircleX() {
+        return circleX;
     }
 
-    double[] getCIRCLE_Y() {
-        return CIRCLE_Y;
+    double[] getCircleY() {
+        return circleY;
     }
 }

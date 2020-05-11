@@ -279,7 +279,7 @@ public class GraphModel implements Serializable {
                         matrix[i][j] = 0.;
                         matrix[j][i] = 0.;
                     }
-                    else { //TODO проверить на деление на 0 или запретить 0 вовсе
+                    else {
                         if (graphNodes.get(i) == edge.getOrigin()) {
                             matrix[i][j] = edge.getWeight(); // weight in forward direction
                             matrix[j][i] = 1.0 / matrix[i][j]; // 1 / weight in reverse direction

@@ -49,17 +49,22 @@ public class MainController extends BaseController{
     /**
      * height of menu bar
      */
-    private static final double menuBarHeight = 30;
+    private static final double MENU_BAR_HEIGHT = 30;
 
     /* strings with function names*/
-    private static final String functionHashimoto = "Hashimoto";
-    private static final String functionBass = "Bass";
-    private static final String functionMizunoSato = "Mizuno, Sato";
+    private static final String FUNCTION_HASHIMOTO = "Hashimoto";
+    private static final String FUNCTION_BASS = "Bass";
+    private static final String FUNCTION_MIZUNO_SATO = "Mizuno, Sato";
 
 
-    private static final String aboutString = "Программа разработана в рамках выполения курсовой работы ОП ПИ НИУ ВШЭ\n " +
+    private static final String ABOUT_STRING = "Программа разработана в рамках выполения курсовой работы ОП ПИ НИУ ВШЭ\n " +
             "Исполнитель: \n Филонов Всеволод Андреевич\n группа БПИ185";
     private static Paint nodeColor = Color.RED;
+
+    private static final String HELP_STRING = "Программа вычисляет обратную дзета-функцию. \n" +
+            "Для вычисления необходимо ввести аргумент функции, выбрать вид функции, при необходимости указать веса ребер.\n" +
+            "Точность округления задается целым числом в графе \"Точность\". Пустое поле означает точность по умолчанию (8 знаков)" +
+            "Для расчета функции необходимо нажать кнопку \"Расчитать\". Результат появится в графе ниже.\n";
 
     /* selection controls*/
     /**
@@ -191,8 +196,8 @@ public class MainController extends BaseController{
     @FXML
     public void initialize(){
         // comboBox items
-        functionComboBox.getItems().addAll(functionHashimoto, functionBass, functionMizunoSato);
-        functionComboBox.setValue(functionHashimoto);
+        functionComboBox.getItems().addAll(FUNCTION_HASHIMOTO, FUNCTION_BASS, FUNCTION_MIZUNO_SATO);
+        functionComboBox.setValue(FUNCTION_HASHIMOTO);
 
         //model creation
         model = new GraphModel();
@@ -200,10 +205,10 @@ public class MainController extends BaseController{
         //UI sizes
         workingField.setMaxWidth(screenSize.getWidth());
         workingField.setPrefWidth(screenSize.getWidth() * 3 / 8);
-        workingField.setPrefHeight(screenSize.getHeight() / 2 - menuBarHeight);
+        workingField.setPrefHeight(screenSize.getHeight() / 2 - MENU_BAR_HEIGHT);
         controlBox.setMaxWidth(screenSize.getWidth());
         controlBox.setPrefWidth(screenSize.getWidth() / 8.);
-        controlBox.setPrefHeight(screenSize.getHeight() / 2 - menuBarHeight);
+        controlBox.setPrefHeight(screenSize.getHeight() / 2 - MENU_BAR_HEIGHT);
     }
 
     /**
@@ -219,7 +224,7 @@ public class MainController extends BaseController{
                 return;     //nothing to change
             }
 
-            if (functionComboBox.getValue().equals(functionMizunoSato)) {    //weighted function
+            if (functionComboBox.getValue().equals(FUNCTION_MIZUNO_SATO)) {    //weighted function
                 for (GraphEdge e : model.getGraphEdges()){
                     Arrow arc = edgemap.get(e);
                     arc.setOrientationVisibility(true);
@@ -240,8 +245,8 @@ public class MainController extends BaseController{
         });
         scene.heightProperty().addListener(property -> {    // height property
             double newHeight = screenSize.getHeight();
-            workingField.setPrefHeight(newHeight - menuBarHeight);
-            controlBox.setPrefHeight(newHeight - menuBarHeight);
+            workingField.setPrefHeight(newHeight - MENU_BAR_HEIGHT);
+            controlBox.setPrefHeight(newHeight - MENU_BAR_HEIGHT);
         });
     }
 
@@ -339,13 +344,13 @@ public class MainController extends BaseController{
         ComplexNumber res;  // result value
         try {
             switch (functionComboBox.getValue()) {       // choice of function
-                case functionHashimoto:
+                case FUNCTION_HASHIMOTO:
                     res = model.calculateZetaHashimoto(new ComplexNumber(re, im));
                     break;
-                case functionBass:
+                case FUNCTION_BASS:
                     res = model.calculateZetaBass(new ComplexNumber(re, im));
                     break;
-                case functionMizunoSato:
+                case FUNCTION_MIZUNO_SATO:
                     res = model.calculateZetaMizunoSato(new ComplexNumber(re, im));
                     break;
                 default:
@@ -427,7 +432,11 @@ public class MainController extends BaseController{
      */
     @FXML
     private void infoMenuHandler(ActionEvent event){
-        //TODO доделать
+        Alert msg = new Alert(Alert.AlertType.ERROR, HELP_STRING, ButtonType.OK);
+        msg.setTitle("Help");
+        msg.setHeaderText(null);
+        msg.setGraphic(null);
+        msg.show();
     }
 
     /**
@@ -437,7 +446,7 @@ public class MainController extends BaseController{
     @FXML
     private void aboutMenuHandler(ActionEvent event){
         // show content of aboutString
-        Alert msg = new Alert(Alert.AlertType.ERROR, aboutString, ButtonType.OK);
+        Alert msg = new Alert(Alert.AlertType.ERROR, ABOUT_STRING, ButtonType.OK);
         msg.setTitle("About");
         msg.setHeaderText(null);
         msg.setGraphic(null);
@@ -506,7 +515,7 @@ public class MainController extends BaseController{
                             Circle tCircle = (Circle) nodemap.get(tail);
                             Arrow arc;
                             // create arc view
-                            if (functionComboBox.getValue().equals(functionMizunoSato)) {    //weighted func
+                            if (functionComboBox.getValue().equals(FUNCTION_MIZUNO_SATO)) {    //weighted func
                                 arc = new Arrow(oCircle.getCenterX(), oCircle.getCenterY(),
                                         tCircle.getCenterX(), tCircle.getCenterY(), NODE_RADIUS,
                                         true, 0.0);
@@ -555,7 +564,7 @@ public class MainController extends BaseController{
             public void handle(MouseEvent mouseEvent) {
                 mouseEvent.consume();   // consume event
                 if ((mouseEvent.getButton() == MouseButton.PRIMARY)
-                        && (functionComboBox.getValue().equals(functionMizunoSato))) { //set weight
+                        && (functionComboBox.getValue().equals(FUNCTION_MIZUNO_SATO))) { //set weight
                     // ask user to set weight
                     TextInputDialog dialog = new TextInputDialog();
                     dialog.setHeaderText(null);
@@ -644,10 +653,10 @@ public class MainController extends BaseController{
             SavedSession session = (SavedSession) ois.readObject(); // try to retrieve object
 
             // get values
-            GraphModel model = session.getMODEL();
-            List<Arrow> arrows = session.getARROWS();
-            double[] xs = session.getCIRCLE_X();
-            double[] ys = session.getCIRCLE_Y();
+            GraphModel model = session.getModel();
+            List<Arrow> arrows = session.getArrows();
+            double[] xs = session.getCircleX();
+            double[] ys = session.getCircleY();
             this.model = model;
 
             // clear current session
@@ -669,7 +678,7 @@ public class MainController extends BaseController{
             index = 0;
             for (GraphEdge e : model.getGraphEdges()){
                 Arrow arc = arrows.get(index);                                  // get arc
-                if (functionComboBox.getValue().equals(functionMizunoSato)) {   // reinitialize weighted
+                if (functionComboBox.getValue().equals(FUNCTION_MIZUNO_SATO)) {   // reinitialize weighted
                     arc.reinitialize(NODE_RADIUS, true);
                 } else {                                                        // reinitialize not weighted
                     arc.reinitialize(NODE_RADIUS, false);
