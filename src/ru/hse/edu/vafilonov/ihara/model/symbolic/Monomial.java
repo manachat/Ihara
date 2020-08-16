@@ -55,22 +55,16 @@ class Monomial {
 
         int power = a.power + b.power;
         boolean sign = (a.sign == b.sign);
-        int aSize = a.coefficients.size();
-        int bSize = b.coefficients.size();
-        boolean[] aCheck = new boolean[aSize];
-        boolean[] bCheck = new boolean[bSize];
-        for (int i = 0; i < aSize; i++) {
-            aCheck[i] = false;
+        // copy coefficients
+        PriorityQueue<PrimeRoot> resQueue = new PriorityQueue<>();
+        for (PrimeRoot r : a.coefficients) {
+            resQueue.add(r.copy());
         }
-        for (int i = 0; i < bSize; i++) {
-            bCheck[i] = false;
+        for (PrimeRoot r : b.coefficients) {
+            resQueue.add(r.copy());
         }
 
-        if (aSize >= bSize) {
-            
-        } else {
-
-        }
+        return new Monomial(resQueue, sign, power);
     }
 
     public Monomial copy() {

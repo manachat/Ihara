@@ -2,7 +2,7 @@ package ru.hse.edu.vafilonov.ihara.model.symbolic;
 
 class PrimeRoot implements Comparable<PrimeRoot> {
     private int root;
-    private int replication = 1;
+    private int replication = 1; // not used
     public PrimeRoot(int root) {
         if (root < 1) {
             throw new IllegalArgumentException("Root should be positive.");

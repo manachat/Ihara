@@ -52,12 +52,32 @@ public class PolynomialFraction {
     }
 
     public static PolynomialFraction multiply(PolynomialFraction a, PolynomialFraction b) {
+        if (a.isAddId() || b.isAddId()) {
+            return new PolynomialFraction(0, 1);
+        }
+        if (a.isMultId()) {
+            return b.copy();
+        }
+        if (b.isMultId()) {
+            return a.copy();
+        }
         Polynomial num = Polynomial.multiply(a.numerator, b.numerator);
         Polynomial den = Polynomial.multiply(a.denominator, b.denominator);
         return new PolynomialFraction(num, den);
     }
 
     public static PolynomialFraction sum(PolynomialFraction a, PolynomialFraction b) {
+        // a/b + c/d == (ad + bc)/bd
+        Polynomial den = Polynomial.multiply(a.denominator, b.denominator);
+        Polynomial num = Polynomial.sum(Polynomial.multiply(a.numerator, b.denominator),
+                                        Polynomial.multiply(a.denominator, b.numerator));
+        return new PolynomialFraction(num, den);
+    }
+
+    /**
+     * reduces polynomials
+     */
+    private void reduce() {
 
     }
 
