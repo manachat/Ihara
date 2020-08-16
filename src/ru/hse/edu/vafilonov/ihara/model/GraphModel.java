@@ -154,6 +154,7 @@ public class GraphModel implements Serializable {
 
     /**
      * Calculates reverse Ihara Zeta function using Hashimoto formula
+     * det(I-u(B-J))
      * @param u argument
      * @return function value
      * @throws IllegalStateException if there are no edges in graph
@@ -171,6 +172,7 @@ public class GraphModel implements Serializable {
 
     /**
      * Calculates reverse Ihara Zeta function using Bass formula
+     * det(I - uA + u^2 Q)
      * @param u argument
      * @return function value
      * @throws IllegalStateException if there are no nodes in graph

@@ -26,9 +26,13 @@ public class PolynomialMatrix {
 
     }
 
+
     public PolynomialFraction get(int i, int j) {
         return matrix[i][j];
     }
 
+    public PolynomialFraction getDeterminant() {
+
+    }
 
 }
