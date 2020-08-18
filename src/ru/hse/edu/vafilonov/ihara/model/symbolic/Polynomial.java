@@ -1,6 +1,8 @@
 package ru.hse.edu.vafilonov.ihara.model.symbolic;
 
+import java.sql.BatchUpdateException;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 class Polynomial {
 
@@ -81,5 +83,69 @@ class Polynomial {
             mons.add(m.copy());
         }
         return new Polynomial(mons);
+    }
+
+    @Override
+    public String toString() {
+        return toString('u');
+    }
+
+    public String toString(char arg) {
+        if (isAddId()) {
+            return "0";
+        }
+        if (isMultId()) {
+            return "1";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        terms.sort(new MonomialPowerComparator());
+        int currPower = -1;             // по идее power не должна быть меньше 0 в дробной структуре
+        int monNumber = 0;              // number of monomials with this power
+
+        for (int i = 0; i < terms.size(); i++) {
+            if (terms.get(i).getPower() != currPower) { // write down previous coefs
+                if (monNumber == 1) {
+                    builder.append(terms.get(i - 1).toString(arg));
+                }
+                if (monNumber > 1) {
+                    builder.append('(');
+                    for (int j = i - monNumber; j < i; j++) {
+                        builder.append(terms.get(j).coefsToString());
+                    }
+                    builder.append(')');
+                    if (currPower > 0) {
+                        builder.append(arg);
+                        builder.append("^{");
+                        builder.append(currPower);
+                        builder.append('}');
+                    }
+                }
+
+                currPower = terms.get(i).getPower();
+                monNumber = 1;
+            } else {
+                monNumber++;
+            }
+        }
+        // append last element
+        if (monNumber == 1) {
+            builder.append(terms.get(terms.size() - 1).toString(arg));
+        }
+        if (monNumber > 1) {
+            builder.append('(');
+            for (int j = terms.size() - monNumber; j < terms.size(); j++) {
+                builder.append(terms.get(j).coefsToString());
+            }
+            builder.append(')');
+            if (currPower > 0) {
+                builder.append(arg);
+                builder.append("^{");
+                builder.append(currPower);
+                builder.append('}');
+            }
+        }
+
+        return builder.toString();
     }
 }

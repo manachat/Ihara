@@ -36,4 +36,9 @@ class PrimeRoot implements Comparable<PrimeRoot> {
     public int compareTo(PrimeRoot o) {
         return Integer.compare(this.root, o.root);
     }
+
+    @Override
+    public String toString() {
+        return "\\sqrt{" + root + "}";
+    }
 }

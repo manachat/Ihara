@@ -82,10 +82,27 @@ public class PolynomialFraction {
     }
 
     public PolynomialFraction copy() {
-        Polynomial num = denominator.copy();
-        Polynomial den = numerator.copy();
+        Polynomial den = denominator.copy();
+        Polynomial num = numerator.copy();
         return new PolynomialFraction(num, den);
     }
 
+    /*
+        LaTeX interpretation
+     */
+    @Override
+    public String toString() {
+        if (isAddId()) {
+            return "0";
+        }
+        if (isMultId()) {
+            return "1";
+        }
 
+        if (denominator.isMultId()) {
+            return numerator.toString();
+        }
+
+        return "\\frac{" + numerator.toString() + "}{" + denominator.toString() + "}" ;
+    }
 }

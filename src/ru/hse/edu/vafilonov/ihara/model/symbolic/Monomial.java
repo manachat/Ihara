@@ -3,6 +3,7 @@ package ru.hse.edu.vafilonov.ihara.model.symbolic;
 import javafx.scene.layout.Priority;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.PriorityQueue;
 
 class Monomial {
@@ -20,6 +21,10 @@ class Monomial {
         coefficients = coefs;
         this.sign = sign;
         this.power = power;
+    }
+
+    public int getPower() {
+        return power;
     }
 
     public boolean isAddId() {
@@ -73,6 +78,62 @@ class Monomial {
             coefs.add(r.copy());
         }
         return new Monomial(coefs, sign, power);
+    }
+
+    @Override
+    public String toString() {
+        return toString('u');   // 'u' by default
+    }
+
+    public String toString(char arg) {
+        if (isAddId()) {
+            return "0";
+        }
+        if (isMultId()) {
+            return "1";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        if (!sign){
+            builder.append('-');
+        }
+        for (PrimeRoot p : coefficients) {
+            builder.append(p.toString());
+        }
+        if (power != 0) {
+            builder.append(arg);
+            builder.append("^{");
+            builder.append(power);
+            builder.append('}');
+        }
+
+        return builder.toString();
+    }
+
+    public String coefsToString() {
+        if (isAddId()) {
+            return "0";
+        }
+        if (isMultId()) {
+            return "1";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        if (!sign){
+            builder.append('-');
+        }
+        for (PrimeRoot p : coefficients) {
+            builder.append(p.toString());
+        }
+
+        return builder.toString();
+    }
+}
+
+class MonomialPowerComparator implements Comparator<Monomial> {
+    @Override
+    public int compare(Monomial o1, Monomial o2) {
+        return Integer.compare(o1.getPower(), o2.getPower());
     }
 }
 
