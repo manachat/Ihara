@@ -27,6 +27,13 @@ public class PolynomialFraction {
         this.denominator = new Polynomial(denominator);
     }
 
+    public void multByArg(int power) {
+        if (power < 1) {
+            throw new IllegalArgumentException("Power of argument should be positive");
+        }
+        numerator.multByArg(power);
+    }
+
     public static PolynomialFraction getMultId() {
         return new PolynomialFraction(1,1);
     }
@@ -40,7 +47,21 @@ public class PolynomialFraction {
     }
 
     public boolean isMultId() {
-        return numerator.isMultId() && denominator.isMultId();
+        return (numerator.isMultId() && denominator.isMultId()) ||
+                (denominator.isInvMultId() && denominator.isInvMultId());
+    }
+
+    public boolean isInvMultId() {
+        return (numerator.isInvMultId() && denominator.isMultId()) ||
+                (numerator.isMultId() && denominator.isInvMultId());
+    }
+
+    public Polynomial getNumerator() {
+        return numerator;
+    }
+
+    public Polynomial getDenominator() {
+        return denominator;
     }
 
     public PolynomialFraction getMultInverse() {
@@ -74,13 +95,6 @@ public class PolynomialFraction {
         return new PolynomialFraction(num, den);
     }
 
-    /**
-     * reduces polynomials
-     */
-    private void reduce() {
-
-    }
-
     public PolynomialFraction copy() {
         Polynomial den = denominator.copy();
         Polynomial num = numerator.copy();
@@ -98,11 +112,19 @@ public class PolynomialFraction {
         if (isMultId()) {
             return "1";
         }
-
+        //reduce();
         if (denominator.isMultId()) {
             return numerator.toString();
         }
 
         return "\\frac{" + numerator.toString() + "}{" + denominator.toString() + "}" ;
+    }
+
+    /**
+     * reduces polynomials
+     */
+    public void reduce() {
+        numerator.reduce();
+        denominator.reduce();
     }
 }

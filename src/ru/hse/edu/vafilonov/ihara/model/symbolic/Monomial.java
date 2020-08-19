@@ -2,14 +2,17 @@ package ru.hse.edu.vafilonov.ihara.model.symbolic;
 
 import javafx.scene.layout.Priority;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-class Monomial {
+public class Monomial {
     private PriorityQueue<PrimeRoot> coefficients = new PriorityQueue<>();
     private boolean sign = true;                // + by default
     private int power = 0;                      // without argument
+
+    int irrational = 1; // product of irrational parts, used in reducers
 
     public Monomial(int root) {
         if (root != 0) {                            // zero value is defined by lack of coefs
@@ -27,18 +30,25 @@ class Monomial {
         return power;
     }
 
+    public boolean isSign() {
+        return sign;
+    }
+
+    // product of irrational parts, used in reducers, package-private
+    int getIrrational() {
+        return irrational;
+    }
+
     public boolean isAddId() {
-        /*
-        if (coefficients.size() == 0 && power == 0) {
-            return true;
-        }
-        return false;
-         */
         return (coefficients.size() == 0 && power == 0);
     }
 
     public boolean isMultId() {
         return (power == 0 && sign && (coefficients.size() == 1 && coefficients.peek().getRoot() == 1));
+    }
+
+    public boolean isInvMultId() {
+        return (power == 0 && !sign && (coefficients.size() == 1 && coefficients.peek().getRoot() == 1));
     }
 
     public Monomial getAddInverse() {
@@ -47,15 +57,27 @@ class Monomial {
         return inv;
     }
 
+    public PriorityQueue<PrimeRoot> getCoefficients() {
+        return coefficients;
+    }
+
     public static Monomial multiply(Monomial a, Monomial b) {
         if (a.isAddId() || b.isAddId()) {
             return new Monomial(0);
         }
+
         if (a.isMultId()) {
             return b.copy();
         }
         if (b.isMultId()) {
             return a.copy();
+        }
+
+        if (a.isInvMultId()) {
+            return b.getAddInverse();
+        }
+        if (b.isInvMultId()) {
+            return a.getAddInverse();
         }
 
         int power = a.power + b.power;
@@ -70,6 +92,13 @@ class Monomial {
         }
 
         return new Monomial(resQueue, sign, power);
+    }
+
+    public void multByArg(int power) {
+        if (power < 1) {
+            throw new IllegalArgumentException("Power of argument should be positive");
+        }
+        this.power += power;
     }
 
     public Monomial copy() {
@@ -94,12 +123,7 @@ class Monomial {
         }
 
         StringBuilder builder = new StringBuilder();
-        if (!sign){
-            builder.append('-');
-        }
-        for (PrimeRoot p : coefficients) {
-            builder.append(p.toString());
-        }
+        builder.append(coefsToString());
         if (power != 0) {
             builder.append(arg);
             builder.append("^{");
@@ -122,11 +146,39 @@ class Monomial {
         if (!sign){
             builder.append('-');
         }
+
+        reduce();
+
+        int counter = 0;
         for (PrimeRoot p : coefficients) {
+            if (counter > 0) {
+                builder.append("\\cdot");
+            }
             builder.append(p.toString());
+            counter++;
         }
 
         return builder.toString();
+    }
+
+    public void reduce() {
+        // reduce repeated roots
+        ArrayList<PrimeRoot> reducedRoots = new ArrayList<>();
+        // create stream, group by root and count replication of each root
+        Stream<PrimeRoot> st = coefficients.stream();
+        Map<Integer, List<PrimeRoot>> countedRoots = st.collect(Collectors.groupingBy(PrimeRoot::getRoot));
+        countedRoots.forEach((root, rootList) -> {
+            int replicationNumber = 0;
+            for (PrimeRoot p : rootList) {
+                replicationNumber += p.getReplication();
+            }
+            reducedRoots.add(new PrimeRoot(root, replicationNumber));
+        });
+        if (reducedRoots.size() > 1){
+            reducedRoots.removeIf(r -> r.getRoot() == 1);
+        }
+        coefficients.clear();
+        coefficients.addAll(reducedRoots);
     }
 }
 

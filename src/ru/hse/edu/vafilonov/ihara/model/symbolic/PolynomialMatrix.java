@@ -56,6 +56,14 @@ public class PolynomialMatrix {
         return new PolynomialMatrix(res);
     }
 
+    public void multByArg(int power) {
+        for (int i = 0; i < size; i++){
+            for (int j = 0; j < size; j++){
+                matrix[i][j].multByArg(power);
+            }
+        }
+    }
+
     public PolynomialFraction getDeterminant() {
         PolynomialFraction[][] copy = new PolynomialFraction[size][size]; //copy matrix due to it immutability
         for (int i = 0; i < size; i++){
