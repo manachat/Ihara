@@ -142,8 +142,11 @@ public class GraphModel implements Serializable {
      */
     private void checkWeights() throws ArithmeticException{
         for (GraphEdge e: graphEdges) {
-            if (e.getWeight() == 0.0){
-                throw new ArithmeticException("Веса не могут быть нулевыми");
+            String w = e.getWeight();
+            if (w.charAt(0) != 's') {
+                if (Double.parseDouble(w) == 0.0){
+                    throw new ArithmeticException("Веса не могут быть нулевыми");
+                }
             }
         }
     }
@@ -283,11 +286,12 @@ public class GraphModel implements Serializable {
                     }
                     else {
                         if (graphNodes.get(i) == edge.getOrigin()) {
-                            matrix[i][j] = edge.getWeight(); // weight in forward direction
+                            // function should be called without symbolic
+                            matrix[i][j] = Double.parseDouble(edge.getWeight()); // weight in forward direction
                             matrix[j][i] = 1.0 / matrix[i][j]; // 1 / weight in reverse direction
                         }
                         else {
-                            matrix[j][i] = edge.getWeight();
+                            matrix[j][i] = Double.parseDouble(edge.getWeight());
                             matrix[i][j] = 1.0 / matrix[j][i];
                         }
                     }

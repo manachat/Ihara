@@ -31,7 +31,7 @@ public class GraphEdge extends AbstractGraphElement implements Serializable {
     /**
      * weight of main direction
      */
-    private double weight = 0.0;
+    private String weight = "0.0";
 
     /**
      * Constructor
@@ -56,7 +56,7 @@ public class GraphEdge extends AbstractGraphElement implements Serializable {
      * Sets weight for edge's main direction
      * @param w weight value
      */
-    public void setWeight(double w){
+    public void setWeight(String w){
         weight = w;
     }
 
@@ -64,7 +64,7 @@ public class GraphEdge extends AbstractGraphElement implements Serializable {
      * returns wight of main direction
      * @return weight value
      */
-    public double getWeight() {
+    public String getWeight() {
         return weight;
     }
 

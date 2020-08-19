@@ -115,6 +115,12 @@ public class MainController extends BaseController{
     private TextField imText;
 
     /**
+     * Checkbox for symbolic computation
+     */
+    @FXML
+    private CheckBox symbolicCheckbox;
+
+    /**
      * field for accuracy value reading
      */
     @FXML
@@ -518,11 +524,11 @@ public class MainController extends BaseController{
                             if (functionComboBox.getValue().equals(FUNCTION_MIZUNO_SATO)) {    //weighted func
                                 arc = new Arrow(oCircle.getCenterX(), oCircle.getCenterY(),
                                         tCircle.getCenterX(), tCircle.getCenterY(), NODE_RADIUS,
-                                        true, 0.0);
+                                        true, "0.0");
                             } else {                                                        // not weighted func
                                 arc = new Arrow(oCircle.getCenterX(), oCircle.getCenterY(),
                                         tCircle.getCenterX(), tCircle.getCenterY(), NODE_RADIUS,
-                                        false, 0.0);
+                                        false, "0.0");
                             }
 
                             // attach handler for edge
@@ -573,9 +579,20 @@ public class MainController extends BaseController{
                     dialog.setContentText("Вес: ");
 
                     Optional<String> result = dialog.showAndWait();
-                    double w;
+
                     // user haven't aborted entry
                     if (result.isPresent()) {
+                        if (!checkWeight(result.get())) {
+                            // notify user
+                            Alert msg = new Alert(Alert.AlertType.ERROR, "Некорректный ввод", ButtonType.OK);
+                            msg.setTitle("Error");
+                            msg.setHeaderText(null);
+                            msg.setGraphic(null);
+                            msg.show();
+                            return;
+                        }
+                        /* OLD VERSION
+
                         try {                               // try to read value
                             w = Double.parseDouble(result.get());
                         }
@@ -588,12 +605,12 @@ public class MainController extends BaseController{
                             msg.show();
                             return; // abort
                         }
-
-                        graphEdge.setWeight(w); //changes edge's weight
+                        */
+                        graphEdge.setWeight(result.get()); //changes edge's weight
                         /* remove old text from view and replace with new */
                         Text oldText = arc.getWeightText();                     // get old text
                         workingField.getChildren().remove(oldText);             // remove old text from gui
-                        arc.setWeightText(w);                                   // set new text
+                        arc.setWeightText(result.get());                                   // set new text
                         workingField.getChildren().add(arc.getWeightText());    // add new text to gui
                     }
                 } else if (mouseEvent.getButton() == MouseButton.SECONDARY) { //delete edge
@@ -604,6 +621,37 @@ public class MainController extends BaseController{
 
         for (Shape s : arc.getAllElements()){   // set handler to all elements
             s.setOnMouseClicked(handler);
+        }
+    }
+
+    private boolean checkWeight(String input) {
+        if (input.charAt(0) != 's') {
+            try {                               // try to read value
+                Double.parseDouble(input);
+                return true;
+            }
+            catch (NumberFormatException nex){  // incorrect input
+                return false; // abort
+            }
+        } else {    // check for sqrt(n)
+            if (input.substring(0,5).equals("sqrt(")) {
+                int end = input.indexOf(')');
+                if (end == -1) {
+                    return false;
+                }
+
+                try {
+                    int weight = Integer.parseInt(input.substring(5, end));
+                    if (weight < 1) {
+                        return false;
+                    }
+                    return true;
+                } catch (NumberFormatException nex) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
         }
     }
 

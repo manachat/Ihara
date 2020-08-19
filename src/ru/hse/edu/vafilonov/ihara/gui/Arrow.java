@@ -71,7 +71,7 @@ public class Arrow implements Serializable {
      * weight of the associated edge
      * used in text drawing
      */
-    private double weight;
+    private String weight;
 
     /*
     graphics components are also not being serialized
@@ -116,7 +116,7 @@ public class Arrow implements Serializable {
      * @param weighted shows if arrow weight should be displayed
      * @param weight wight value of edge
      */
-    Arrow(double x1, double y1, double x2, double y2, double nodeRadius, boolean weighted, double weight) {
+    Arrow(double x1, double y1, double x2, double y2, double nodeRadius, boolean weighted, String weight) {
         this.x1 = x1;
         this.x2 = x2;
         this.y1 = y1;
@@ -158,18 +158,18 @@ public class Arrow implements Serializable {
         if (((vectorX >= 0) && (vectorY >= 0)) //text doesn't cross the arrow
                 || ((vectorX <= 0) && (vectorY <= 0))) {
             weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2.,
-                    String.format("%.2f", weight));
+                    weight);
         }
         else { //text crosses the arrow, need to move to the left
             weightText = new Text((x1 + x2) / 2. - 30, (y1 + y2) / 2.,
-                    String.format("%.2f", weight));
+                    weight);
         }
         weightText.setFont(new Font(15));
         weightText.setFill(TEXT_COLOR);
         weightText.setStroke(Color.BLACK);
         weightText.setStrokeWidth(0.5);
 
-        // text is not weighted so nothig but main line should be displayed
+        // text is not weighted so nothing but main line should be displayed
         if (!weighted){
             firstWing.setVisible(false);
             secondWing.setVisible(false);
@@ -218,10 +218,10 @@ public class Arrow implements Serializable {
 
         if (((vectorX >= 0) && (vectorY >= 0))
                 || ((vectorX <= 0) && (vectorY <= 0))) {
-            weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2., String.format("%.2f", weight));
+            weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2., weight);
         }
         else {
-            weightText = new Text((x1 + x2) / 2. - 30, (y1 + y2) / 2., String.format("%.2f", weight));
+            weightText = new Text((x1 + x2) / 2. - 30, (y1 + y2) / 2., weight);
         }
 
         weightText.setFont(new Font(15));
@@ -268,7 +268,7 @@ public class Arrow implements Serializable {
      * @exception IllegalStateException if arrow
      *              wasn't reinitialized after deserialization
      */
-    void setWeightText(double weight) {
+    void setWeightText(String weight) {
         if (!initialized){
             throw new IllegalStateException("Arrow wasn't initialized");
         }
@@ -280,10 +280,10 @@ public class Arrow implements Serializable {
         boolean visibility = weightText.isVisible();
 
         if ((vectorX >= 0) && (vectorY >= 0) || (vectorX <= 0) && (vectorY <= 0)) {
-            weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2., String.format("%.2f", weight));
+            weightText = new Text((x1 + x2) / 2., (y1 + y2) / 2., weight);
         }
         else { //text crosses arrow, need to move to the left
-            weightText = new Text((x1 + x2) / 2. - 30, (y1 + y2) / 2., String.format("%.2f", weight));
+            weightText = new Text((x1 + x2) / 2. - 30, (y1 + y2) / 2., weight);
         }
 
         weightText.setFont(new Font(15));
