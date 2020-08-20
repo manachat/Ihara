@@ -2,6 +2,9 @@ package ru.hse.edu.vafilonov.ihara.model.symbolic;
 
 import ru.hse.edu.vafilonov.ihara.model.ComplexNumber;
 
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+
 /**
  * WARNING!
  * ALL CLASSES IN PACKAGE "SYMBOLIC" ARE
@@ -43,6 +46,27 @@ public class PolynomialFraction {
 
     public static PolynomialFraction getAddId() {
         return new PolynomialFraction(0,1);
+    }
+
+    public static PolynomialFraction constructNumber(int root, int replication) {
+        if (root == 0) {
+            return PolynomialFraction.getAddId();
+        }
+        if (root == 1) {
+            return PolynomialFraction.getMultId();
+        }
+        if (root == -1) {
+            return PolynomialFraction.getMultId().getAddInverse();
+        }
+
+        PrimeRoot r = new PrimeRoot(root, replication);
+        var queue = new PriorityQueue<PrimeRoot>();
+        queue.add(r);
+        Monomial m = new Monomial(queue, root > 0, 0);
+        var list = new ArrayList<Monomial>();
+        list.add(m);
+        Polynomial p = new Polynomial(list);
+        return new PolynomialFraction(p, new Polynomial(1));
     }
 
     public boolean isAddId() {

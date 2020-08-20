@@ -1,5 +1,6 @@
 package ru.hse.edu.vafilonov.ihara.model;
 
+import ru.hse.edu.vafilonov.ihara.model.symbolic.Monomial;
 import ru.hse.edu.vafilonov.ihara.model.symbolic.PolynomialFraction;
 import ru.hse.edu.vafilonov.ihara.model.symbolic.PolynomialMatrix;
 
@@ -293,7 +294,24 @@ public class GraphModel implements Serializable {
     }
 
     public PolynomialFraction calculateSymbolicZetaMizunoSato() {
-        return null;
+        if (graphNodes.size() == 0) {
+            throw new IllegalStateException("Отсутствуют узлы.");
+        }
+
+        PolynomialMatrix id = PolynomialMatrix.getIdentityMatrix(graphNodes.size());
+        PolynomialMatrix adjacency = constructSymbolicWeightedAdjacencyMatrix();
+        PolynomialMatrix Q = constructSymbolicQMatrix();
+        PolynomialFraction uSquared = PolynomialFraction.getMultId();
+        uSquared.multByArg(2);
+        adjacency.multByArg(1);     // uA
+        adjacency = adjacency.scalarMult(PolynomialFraction.getMultId().getAddInverse()); // -uA
+        Q.multByArg(2);             // u^2Q
+        PolynomialMatrix intermediate = PolynomialMatrix.sum(id, adjacency); // I - uA
+        PolynomialMatrix result = PolynomialMatrix.sum(intermediate, Q);    // I - uA + u^2Q
+        int power = graphEdges.size() - graphNodes.size(); //m - n
+        PolynomialFraction coef = PolynomialFraction.poweredBinomial(power); // (1-u^2)^(m-n)
+        PolynomialFraction det = result.getDeterminant(); // det(I - uA + u^2Q)
+        return PolynomialFraction.multiply(coef, det);
     }
 
 
@@ -309,13 +327,11 @@ public class GraphModel implements Serializable {
             for (int j = i; j < size; j++) {
                 if (i == j){
                     matrix[i][j] = 0.;
-                }
-                else {
+                } else {
                     if (GraphNode.getConnection(graphNodes.get(i), graphNodes.get(j)) == null) {
                         matrix[i][j] = 0.;
                         matrix[j][i] = 0.;
-                    }
-                    else {
+                    } else {
                         matrix[i][j] = 1.;
                         matrix[j][i] = 1.;
                     }
@@ -326,7 +342,24 @@ public class GraphModel implements Serializable {
     }
 
     private PolynomialMatrix constructSymbolicAdjacencyMatrix() {
-        return null;
+        int size = graphNodes.size();
+        PolynomialFraction[][] carcass = new PolynomialFraction[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = i; j < size; j++) {
+                if (i == j) {
+                    carcass[i][j] = PolynomialFraction.getAddId();
+                } else {
+                    if (GraphNode.getConnection(graphNodes.get(i), graphNodes.get(j)) == null) {
+                        carcass[i][j] = PolynomialFraction.getAddId();
+                        carcass[j][i] = PolynomialFraction.getAddId();
+                    } else {
+                        carcass[i][j] = PolynomialFraction.getMultId();
+                        carcass[j][i] = PolynomialFraction.getMultId();
+                    }
+                }
+            }
+        }
+        return new PolynomialMatrix(carcass);
     }
 
     /**
@@ -341,20 +374,17 @@ public class GraphModel implements Serializable {
             for (int j = i; j < size; j++) {
                 if (i == j){
                     matrix[i][j] = 0.;
-                }
-                else {
+                } else {
                     GraphEdge edge = GraphNode.getConnection(graphNodes.get(i), graphNodes.get(j));
                     if (edge == null) {
                         matrix[i][j] = 0.;
                         matrix[j][i] = 0.;
-                    }
-                    else {
+                    } else {
                         if (graphNodes.get(i) == edge.getOrigin()) {
                             // function should be called without symbolic
                             matrix[i][j] = Double.parseDouble(edge.getWeight()); // weight in forward direction
                             matrix[j][i] = 1.0 / matrix[i][j]; // 1 / weight in reverse direction
-                        }
-                        else {
+                        } else {
                             matrix[j][i] = Double.parseDouble(edge.getWeight());
                             matrix[i][j] = 1.0 / matrix[j][i];
                         }
@@ -363,6 +393,34 @@ public class GraphModel implements Serializable {
             }
         }
         return new ComplexMatrix(matrix);
+    }
+
+    private PolynomialMatrix constructSymbolicWeightedAdjacencyMatrix() {
+        int size = graphNodes.size();
+        PolynomialFraction[][] carcass = new PolynomialFraction[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = i; j < size; j++) {
+                if (i == j) {
+                    carcass[i][j] = PolynomialFraction.getAddId();
+                } else {
+                    GraphEdge edge = GraphNode.getConnection(graphNodes.get(i), graphNodes.get(j));
+                    if (edge == null) {
+                        carcass[i][j] = PolynomialFraction.getAddId();
+                        carcass[j][i] = PolynomialFraction.getAddId();
+                    } else {
+                        if (graphNodes.get(i) == edge.getOrigin()) {
+                            String rawWeight = edge.getWeight();
+                            int start = rawWeight.indexOf('(');
+                            int end = rawWeight.indexOf(')');
+                            int root = Integer.parseInt(rawWeight.substring(start + 1, end));
+                            carcass[i][j] = new PolynomialFraction(root, 1);
+                            carcass[j][i] = new PolynomialFraction(1, root);
+                        }
+                    }
+                }
+            }
+        }
+        return new PolynomialMatrix(carcass);
     }
 
     /**
@@ -461,7 +519,19 @@ public class GraphModel implements Serializable {
     }
 
     private PolynomialMatrix constructSymbolicQMatrix() {
-        return null;
+        int size = graphNodes.size();
+        PolynomialFraction[][] carcass = new PolynomialFraction[size][size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (i == j) {
+                    int degree = graphNodes.get(i).getDegree() - 1;
+                    carcass[i][j] = PolynomialFraction.constructNumber(degree, 2);
+                } else {
+                    carcass[i][j] = PolynomialFraction.getAddId();
+                }
+            }
+        }
+        return new PolynomialMatrix(carcass);
     }
 
     /**

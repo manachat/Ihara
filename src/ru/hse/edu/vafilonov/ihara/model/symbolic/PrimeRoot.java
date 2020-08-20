@@ -8,17 +8,19 @@ class PrimeRoot implements Comparable<PrimeRoot> {
         if (root < 1) {
             throw new IllegalArgumentException("Root should be positive.");
         }
+        /*
         // check for primal
         for (int i = 2; i <= root / 2; i++) {
             if (root % i == 0) {
                 throw new IllegalArgumentException("Root is not primal.");
             }
         }
+         */
         this.root = root;
     }
 
     public PrimeRoot(int root, int replication) {
-        this(root);
+        this.root = root;
         if (replication < 1) {
             throw new IllegalArgumentException("Replication can't be less than 1.");
         }
