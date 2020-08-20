@@ -92,7 +92,8 @@ public final class ComplexNumber extends Number{
         double im = base.getIm();
         double x = base.getRe();
         double y = base.getIm();
-        for (int i = 1; i < power; i++) {
+        int positive = power > 0 ? power : -power;
+        for (int i = 1; i < positive; i++) {
             double newX = x*re - y*im;
             double newY = x*im + re*y;
             x = newX;

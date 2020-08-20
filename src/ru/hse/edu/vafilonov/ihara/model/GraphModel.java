@@ -1,5 +1,8 @@
 package ru.hse.edu.vafilonov.ihara.model;
 
+import ru.hse.edu.vafilonov.ihara.model.symbolic.PolynomialFraction;
+import ru.hse.edu.vafilonov.ihara.model.symbolic.PolynomialMatrix;
+
 import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -13,6 +16,17 @@ import java.util.List;
  * @author Filonov Vsevolod
  */
 public class GraphModel implements Serializable {
+
+    public enum CalculationMode {
+        NUMERICAL,
+        SYMBOLIC
+    }
+
+    /**
+     * Defines the way model will calculate functions
+     */
+    private CalculationMode mode = CalculationMode.NUMERICAL;
+
     /**
      * serialization version identifier
      */
@@ -91,6 +105,10 @@ public class GraphModel implements Serializable {
         return graphEdges;
     }
 
+    public void setMode(CalculationMode mode) {
+        this.mode = mode;
+    }
+
     /**
      * Checks connectivity of graph
      * Method uses broad-first search to check connectivity
@@ -138,15 +156,18 @@ public class GraphModel implements Serializable {
     /**
      * helper method
      * checks if all non-zero weights on edges were set
+     * used in numerical calculations
      * throws
      */
-    private void checkWeights() throws ArithmeticException{
+    private void checkNumericalWeights() throws ArithmeticException{
         for (GraphEdge e: graphEdges) {
             String w = e.getWeight();
-            if (w.charAt(0) != 's') {
-                if (Double.parseDouble(w) == 0.0){
+            try {
+                if (Double.parseDouble(w) == 0.0) {
                     throw new ArithmeticException("Веса не могут быть нулевыми");
                 }
+            } catch (NumberFormatException nfex) {
+                throw new ArithmeticException("Веса должны быть действительными");
             }
         }
     }
@@ -162,14 +183,26 @@ public class GraphModel implements Serializable {
      * @return function value
      * @throws IllegalStateException if there are no edges in graph
      */
-    public ComplexNumber calculateZetaHashimoto(ComplexNumber u) throws IllegalStateException{
+    public ComplexNumber calculateNumericalZetaHashimoto(ComplexNumber u) throws IllegalStateException{
         if (graphEdges.size() == 0){
             throw new IllegalStateException("Отсутствуют ребра");
         }
         ComplexMatrix id = ComplexMatrix.getIdentityMatrix(graphEdges.size()*2); //I
-        ComplexMatrix edgeMatrix = constructEdgeMatrix();
+        ComplexMatrix edgeMatrix = constructNumericalEdgeMatrix();
         ComplexMatrix multipliedEdgeMatrix = edgeMatrix.scalarMult(u.getAddInverse()); // -u(B-J)
         ComplexMatrix resultMatrix = ComplexMatrix.sum(id, multipliedEdgeMatrix);
+        return resultMatrix.getDeterminant();
+    }
+
+    public PolynomialFraction calculateSymbolicZetaHashimoto() {
+        if (graphEdges.size() == 0){
+            throw new IllegalStateException("Отсутствуют ребра");
+        }
+        PolynomialMatrix id = PolynomialMatrix.getIdentityMatrix(graphEdges.size()*2);  // I
+        PolynomialMatrix edgeMatrix = constructSymbolicEdgeMatrix();
+        PolynomialMatrix multipliedEdgeMatrix = edgeMatrix.scalarMult(PolynomialFraction.getMultId().getAddInverse()); // *-1
+        multipliedEdgeMatrix.multByArg(1);  // -u(B-J)
+        PolynomialMatrix resultMatrix = PolynomialMatrix.sum(id, multipliedEdgeMatrix);
         return resultMatrix.getDeterminant();
     }
 
@@ -180,7 +213,7 @@ public class GraphModel implements Serializable {
      * @return function value
      * @throws IllegalStateException if there are no nodes in graph
      */
-    public ComplexNumber calculateZetaBass(ComplexNumber u) throws IllegalStateException{
+    public ComplexNumber calculateNumericalZetaBass(ComplexNumber u) throws IllegalStateException{
         if (graphNodes.size() == 0) {
             throw new IllegalStateException("Отсутствуют узлы.");
         }
@@ -190,8 +223,8 @@ public class GraphModel implements Serializable {
         }
 
         ComplexMatrix id = ComplexMatrix.getIdentityMatrix(graphNodes.size());
-        ComplexMatrix adjacency = constructAdjacencyMatrix();
-        ComplexMatrix Q = constructQMatrix();
+        ComplexMatrix adjacency = constructNumericalAdjacencyMatrix();
+        ComplexMatrix Q = constructNumericalQMatrix();
         ComplexNumber uSquared = ComplexNumber.multiply(u, u);
         ComplexMatrix uA = adjacency.scalarMult(u.getAddInverse()); //-uA
         ComplexMatrix uSqQ = Q.scalarMult(uSquared);
@@ -204,6 +237,29 @@ public class GraphModel implements Serializable {
         return ComplexNumber.multiply(coef, det);
     }
 
+
+    public PolynomialFraction calculateSymbolicZetaBass() {
+        if (graphNodes.size() == 0) {
+            throw new IllegalStateException("Отсутствуют узлы.");
+        }
+
+        PolynomialMatrix id = PolynomialMatrix.getIdentityMatrix(graphNodes.size());
+        PolynomialMatrix adjacency = constructSymbolicAdjacencyMatrix();
+        PolynomialMatrix Q = constructSymbolicQMatrix();
+        PolynomialFraction uSquared = PolynomialFraction.getMultId();
+        uSquared.multByArg(2);
+        adjacency.multByArg(1);     // uA
+        adjacency = adjacency.scalarMult(PolynomialFraction.getMultId().getAddInverse()); // -uA
+        Q.multByArg(2);             // u^2Q
+        PolynomialMatrix intermediate = PolynomialMatrix.sum(id, adjacency); // I - uA
+        PolynomialMatrix result = PolynomialMatrix.sum(intermediate, Q);    // I - uA + u^2Q
+        int power = graphEdges.size() - graphNodes.size(); //m - n
+        PolynomialFraction coef = PolynomialFraction.poweredBinomial(power); // (1-u^2)^(m-n)
+        PolynomialFraction det = result.getDeterminant(); // det(I - uA + u^2Q)
+        return PolynomialFraction.multiply(coef, det);
+    }
+
+
     /**
      * Calculates reverse weighted Ihara Zeta function using Mizuno and Sato formula
      * @param u argument
@@ -211,19 +267,19 @@ public class GraphModel implements Serializable {
      * @throws ArithmeticException if there are zero weights in graph
      * @throws IllegalStateException if there are no nodes in graph
      */
-    public ComplexNumber calculateZetaMizunoSato(ComplexNumber u) throws ArithmeticException, IllegalStateException{
+    public ComplexNumber calculateNumericalZetaMizunoSato(ComplexNumber u) throws ArithmeticException, IllegalStateException{
         if (graphNodes.size() == 0){
             throw new IllegalStateException("Отсутствуют узлы.");
         }
-        checkWeights();
+        checkNumericalWeights();
 
         if (u.equals(ComplexNumber.getMultId())){
             return ComplexNumber.getAddId();
         }
 
         ComplexMatrix id = ComplexMatrix.getIdentityMatrix(graphNodes.size());
-        ComplexMatrix adjacency = constructWeightedAdjacencyMatrix();
-        ComplexMatrix Q = constructQMatrix();
+        ComplexMatrix adjacency = constructNumericalWeightedAdjacencyMatrix();
+        ComplexMatrix Q = constructNumericalQMatrix();
         ComplexNumber uSquared = ComplexNumber.multiply(u, u);
         ComplexMatrix uW = adjacency.scalarMult(u.getAddInverse()); //-uW
         ComplexMatrix uSqQ = Q.scalarMult(uSquared);
@@ -236,13 +292,17 @@ public class GraphModel implements Serializable {
         return ComplexNumber.multiply(coef, det);
     }
 
+    public PolynomialFraction calculateSymbolicZetaMizunoSato() {
+        return null;
+    }
+
 
     /**
      * Constructs unweighted adjacency matrix
      * form current graph state
      * @return adjacency matrix
      */
-    private ComplexMatrix constructAdjacencyMatrix(){
+    private ComplexMatrix constructNumericalAdjacencyMatrix(){
         int size = graphNodes.size();
         double[][] matrix = new double[size][size];
         for (int i = 0; i < size; i++) {
@@ -265,12 +325,16 @@ public class GraphModel implements Serializable {
         return new ComplexMatrix(matrix);
     }
 
+    private PolynomialMatrix constructSymbolicAdjacencyMatrix() {
+        return null;
+    }
+
     /**
      * Constructs weighted adjacency matrix
      * for current graph state
      * @return weighted adjacency matrix
      */
-    private ComplexMatrix constructWeightedAdjacencyMatrix(){
+    private ComplexMatrix constructNumericalWeightedAdjacencyMatrix(){
         int size = graphNodes.size();
         double[][] matrix = new double[size][size];
         for (int i = 0; i < size; i++) {
@@ -308,7 +372,7 @@ public class GraphModel implements Serializable {
      * edgeMatrix = B - J
      * @return B-matrix for current graph state
      */
-    private ComplexMatrix constructEdgeMatrix(){
+    private ComplexMatrix constructNumericalEdgeMatrix(){
         int half = graphEdges.size();
         int size = half * 2;
         double[][] res = new double[size][size];
@@ -342,12 +406,50 @@ public class GraphModel implements Serializable {
         return new ComplexMatrix(res);
     }
 
+    private PolynomialMatrix constructSymbolicEdgeMatrix() {
+        int half = graphEdges.size();
+        int size = half * 2;
+        PolynomialFraction[][] res = new PolynomialFraction[size][size];
+
+        //fill B-J matrix
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (i < half) { // row edge is primary
+                    if (j < half) { //column edge is primary
+                        res[i][j] = (graphEdges.get(i).getTail() == graphEdges.get(j).getOrigin())
+                                ? PolynomialFraction.getMultId() : PolynomialFraction.getMultId();
+                    } else { //column edge is inverse
+                        res[i][j] = graphEdges.get(i).getTail() == graphEdges.get(j - half).getTail()
+                                ? PolynomialFraction.getMultId() : PolynomialFraction.getAddId();
+                        if (i == j - half){ //opposite edges, J-matrix property
+                            res[i][j] = PolynomialFraction.sum(res[i][j],PolynomialFraction.getMultId().getAddInverse()); // -1
+                        }
+                    }
+                }
+                else{ //row edge is inverse
+                    if (j < half) { //column edge is primary
+                        res[i][j] = graphEdges.get(i - half).getOrigin() == graphEdges.get(j).getOrigin()
+                                ? PolynomialFraction.getMultId() : PolynomialFraction.getAddId();
+                        if (i - half == j){ //opposite edges, J-matrix property
+                            res[i][j] = PolynomialFraction.sum(res[i][j],PolynomialFraction.getMultId().getAddInverse()); // -1
+                        }
+                    } else { //column edge is inverse
+                        res[i][j] = graphEdges.get(i - half).getOrigin() == graphEdges.get(j - half).getTail()
+                                ? PolynomialFraction.getMultId() : PolynomialFraction.getAddId();
+                    }
+                }
+            }
+        }
+
+        return new PolynomialMatrix(res);
+    }
+
     /**
      * Constructs Q-matrix -- diagonal matrix
      * with Q[i][i] = deg(V[i]) - 1
      * @return
      */
-    private ComplexMatrix constructQMatrix(){
+    private ComplexMatrix constructNumericalQMatrix(){
         int size = graphNodes.size();
         double[][] carcass = new double[size][size];
         for (int i = 0; i < size; i++) {
@@ -356,6 +458,10 @@ public class GraphModel implements Serializable {
             }
         }
         return new ComplexMatrix(carcass);
+    }
+
+    private PolynomialMatrix constructSymbolicQMatrix() {
+        return null;
     }
 
     /**

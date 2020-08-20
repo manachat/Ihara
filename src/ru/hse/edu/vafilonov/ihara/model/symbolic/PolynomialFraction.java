@@ -1,4 +1,7 @@
 package ru.hse.edu.vafilonov.ihara.model.symbolic;
+
+import ru.hse.edu.vafilonov.ihara.model.ComplexNumber;
+
 /**
  * WARNING!
  * ALL CLASSES IN PACKAGE "SYMBOLIC" ARE
@@ -85,6 +88,24 @@ public class PolynomialFraction {
         Polynomial num = Polynomial.multiply(a.numerator, b.numerator);
         Polynomial den = Polynomial.multiply(a.denominator, b.denominator);
         return new PolynomialFraction(num, den);
+    }
+
+    /**
+     * Method is a helper for creation of (1-u^2)^n
+     * @return
+     */
+    @Deprecated
+    public static PolynomialFraction poweredBinomial(int power) {
+        if (power == 0) {
+            return PolynomialFraction.getMultId();
+        }
+        int positive = Math.abs(power);
+        Polynomial pol = Polynomial.poweredBinomial(positive);
+        if (power > 0) {
+            return new PolynomialFraction(pol, new Polynomial(1));
+        } else {
+            return new PolynomialFraction(new Polynomial(1), pol);
+        }
     }
 
     public static PolynomialFraction sum(PolynomialFraction a, PolynomialFraction b) {

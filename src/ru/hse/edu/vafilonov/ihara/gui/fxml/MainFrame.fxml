@@ -52,7 +52,7 @@
             </VBox.margin>
         </TextField>
 
-        <CheckBox fx:id="symbolicCheckbox" mnemonicParsing="false" text="Символьные вычисления">
+        <CheckBox fx:id="symbolicCheckbox" mnemonicParsing="false" text="Символьные вычисления" onAction="#checkboxHandler">
             <padding>
                 <Insets bottom="10.0" left="5.0" right="5.0" />
             </padding>

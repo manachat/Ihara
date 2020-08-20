@@ -95,8 +95,8 @@ public class Monomial {
     }
 
     public void multByArg(int power) {
-        if (power < 1) {
-            throw new IllegalArgumentException("Power of argument should be positive");
+        if (power < 0) {
+            throw new IllegalArgumentException("Power of argument should be non-negative");
         }
         this.power += power;
     }
@@ -121,9 +121,20 @@ public class Monomial {
         if (isMultId()) {
             return "1";
         }
+        if (isInvMultId()) {
+            return "-1";
+        }
 
         StringBuilder builder = new StringBuilder();
-        builder.append(coefsToString());
+        String coefs = coefsToString();
+
+        if (coefs.equals("1")) {
+            coefs = "";
+        } else if (coefs.equals("-1")) {
+            coefs = "-";
+        }
+
+        builder.append(coefs);
         if (power != 0) {
             builder.append(arg);
             builder.append("^{");

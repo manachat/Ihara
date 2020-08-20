@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import ru.hse.edu.vafilonov.ihara.model.*;
+import ru.hse.edu.vafilonov.ihara.model.symbolic.PolynomialFraction;
 
 /**
  * Controller class for main application page.
@@ -300,78 +301,23 @@ public class MainController extends BaseController{
      */
     @FXML
     private void calculateButtonClickHandler(MouseEvent e){
-        // function argument was not set
-        if (reText.getText().isEmpty() || imText.getText().isEmpty()) {
-            Alert msg = new Alert(Alert.AlertType.ERROR, "Не задан аргумент функции", ButtonType.OK);
-            msg.setTitle("Error");
-            msg.setHeaderText(null);
-            msg.setGraphic(null);
-            msg.show();
-            return;
+
+        if (symbolicCheckbox.isSelected()) {
+            calculateSymbolic();
+        } else {
+            calculateNumerical();
         }
 
-        double re;
-        double im;
-        int accuracy= -1;
+    }
 
-        // read values form text fields and inform user in case or errors
-        try {
-            re = Double.parseDouble(reText.getText());
-            im = Double.parseDouble(imText.getText());
-            if (!accuracyField.getText().isEmpty()) {        // accuracy was set
-                accuracy = Integer.parseInt(accuracyField.getText());
-                if  (accuracy <= 0){
-                    throw new IllegalStateException("Точность должна быть положительной.");
-                }
-            }
-            if (!model.checkConnectivity()) {                // graph is not connected
-                Alert msg = new Alert(Alert.AlertType.ERROR,
-                        "Граф должен быть связным.", ButtonType.OK);
-                msg.setTitle("Внимание");
-                msg.setHeaderText(null);
-                msg.setGraphic(null);
-                msg.show();
-                return;
-            }
-        } catch (NumberFormatException | IllegalStateException nex){ // incorrect input
-            Alert msg;
-            if (nex instanceof NumberFormatException) {
-                msg = new Alert(Alert.AlertType.ERROR, "Некорректный ввод чисел", ButtonType.OK);
-            } else {
-                msg = new Alert(Alert.AlertType.ERROR, nex.getMessage(), ButtonType.OK);
-            }
-            msg.setTitle("Error");
-            msg.setHeaderText(null);
-            msg.setGraphic(null);
-            msg.show();
-            return;
+
+    @FXML
+    private void checkboxHandler() {
+        if (symbolicCheckbox.isSelected()) {
+            model.setMode(GraphModel.CalculationMode.SYMBOLIC);
+        } else {
+            model.setMode(GraphModel.CalculationMode.NUMERICAL);
         }
-
-        ComplexNumber res;  // result value
-        try {
-            switch (functionComboBox.getValue()) {       // choice of function
-                case FUNCTION_HASHIMOTO:
-                    res = model.calculateZetaHashimoto(new ComplexNumber(re, im));
-                    break;
-                case FUNCTION_BASS:
-                    res = model.calculateZetaBass(new ComplexNumber(re, im));
-                    break;
-                case FUNCTION_MIZUNO_SATO:
-                    res = model.calculateZetaMizunoSato(new ComplexNumber(re, im));
-                    break;
-                default:
-                    return;
-            }
-        } catch (ArithmeticException | IllegalStateException exception) {    // inform user about errors
-            Alert msg = new Alert(Alert.AlertType.ERROR, exception.getMessage(), ButtonType.OK);
-            msg.setTitle("Error");
-            msg.setHeaderText(null);
-            msg.setGraphic(null);
-            msg.show();
-            return;
-        }
-
-        resultField.setText(res.accurateToString(accuracy));    // show result with given accuracy
     }
 
     /**
@@ -624,8 +570,13 @@ public class MainController extends BaseController{
         }
     }
 
+    /**
+     * checks entered weight value for correctness
+     * @param input
+     * @return
+     */
     private boolean checkWeight(String input) {
-        if (input.charAt(0) != 's') {
+        if (input.charAt(0) != 's') {           // check for double
             try {                               // try to read value
                 Double.parseDouble(input);
                 return true;
@@ -633,7 +584,7 @@ public class MainController extends BaseController{
             catch (NumberFormatException nex){  // incorrect input
                 return false; // abort
             }
-        } else {    // check for sqrt(n)
+        } else {                                // check for sqrt(n)
             if (input.substring(0,5).equals("sqrt(")) {
                 int end = input.indexOf(')');
                 if (end == -1) {
@@ -753,5 +704,137 @@ public class MainController extends BaseController{
             msg.show();
             return false;   // return failure
         }
+    }
+
+
+    /**
+     * Handles numerical calculation
+     */
+    private void calculateNumerical() {
+        // function argument was not set
+        if (reText.getText().isEmpty() || imText.getText().isEmpty()) {
+            Alert msg = new Alert(Alert.AlertType.ERROR, "Не задан аргумент функции", ButtonType.OK);
+            msg.setTitle("Error");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+            return;
+        }
+
+        double re;
+        double im;
+        int accuracy= -1;
+
+        // read values form text fields and inform user in case or errors
+        try {
+            re = Double.parseDouble(reText.getText());
+            im = Double.parseDouble(imText.getText());
+            if (!accuracyField.getText().isEmpty()) {        // accuracy was set
+                accuracy = Integer.parseInt(accuracyField.getText());
+                if  (accuracy <= 0){
+                    throw new IllegalStateException("Точность должна быть положительной.");
+                }
+            }
+            if (!model.checkConnectivity()) {                // graph is not connected
+                Alert msg = new Alert(Alert.AlertType.ERROR,
+                        "Граф должен быть связным.", ButtonType.OK);
+                msg.setTitle("Внимание");
+                msg.setHeaderText(null);
+                msg.setGraphic(null);
+                msg.show();
+                return;
+            }
+        } catch (NumberFormatException | IllegalStateException nex){ // incorrect input
+            Alert msg;
+            if (nex instanceof NumberFormatException) {
+                msg = new Alert(Alert.AlertType.ERROR, "Некорректный ввод чисел", ButtonType.OK);
+            } else {
+                msg = new Alert(Alert.AlertType.ERROR, nex.getMessage(), ButtonType.OK);
+            }
+            msg.setTitle("Error");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+            return;
+        }
+
+        ComplexNumber res;  // result value
+        try {
+            switch (functionComboBox.getValue()) {       // choice of function
+                case FUNCTION_HASHIMOTO:
+                    res = model.calculateNumericalZetaHashimoto(new ComplexNumber(re, im));
+                    break;
+                case FUNCTION_BASS:
+                    res = model.calculateNumericalZetaBass(new ComplexNumber(re, im));
+                    break;
+                case FUNCTION_MIZUNO_SATO:
+                    res = model.calculateNumericalZetaMizunoSato(new ComplexNumber(re, im));
+                    break;
+                default:
+                    return;
+            }
+        } catch (ArithmeticException | IllegalStateException exception) {    // inform user about errors
+            Alert msg = new Alert(Alert.AlertType.ERROR, exception.getMessage(), ButtonType.OK);
+            msg.setTitle("Error");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+            return;
+        }
+
+        resultField.setText(res.accurateToString(accuracy));    // show result with given accuracy
+    }
+
+
+    /**
+     * Handles symbolic calculation
+     */
+    private void calculateSymbolic() {
+        // read values form text fields and inform user in case or errors
+        try {
+            if (!model.checkConnectivity()) {                // graph is not connected
+                Alert msg = new Alert(Alert.AlertType.ERROR,
+                        "Граф должен быть связным.", ButtonType.OK);
+                msg.setTitle("Внимание");
+                msg.setHeaderText(null);
+                msg.setGraphic(null);
+                msg.show();
+                return;
+            }
+        } catch (IllegalStateException nex){ // incorrect input
+            Alert msg;
+            msg = new Alert(Alert.AlertType.ERROR, nex.getMessage(), ButtonType.OK);
+            msg.setTitle("Error");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+            return;
+        }
+
+        PolynomialFraction res;  // result value
+        try {
+            switch (functionComboBox.getValue()) {       // choice of function
+                case FUNCTION_HASHIMOTO:
+                    res = model.calculateSymbolicZetaHashimoto();
+                    break;
+                case FUNCTION_BASS:
+                    res = model.calculateSymbolicZetaBass();
+                    break;
+                case FUNCTION_MIZUNO_SATO:
+                    res = model.calculateSymbolicZetaMizunoSato();
+                    break;
+                default:
+                    return;
+            }
+        } catch (ArithmeticException | IllegalStateException exception) {    // inform user about errors
+            Alert msg = new Alert(Alert.AlertType.ERROR, exception.getMessage(), ButtonType.OK);
+            msg.setTitle("Error");
+            msg.setHeaderText(null);
+            msg.setGraphic(null);
+            msg.show();
+            return;
+        }
+        res.reduce();                           // reduce value
+        resultField.setText(res.toString());    // show result with given accuracy
     }
 }

@@ -114,9 +114,15 @@ class Polynomial {
         for (int i = 0; i < terms.size(); i++) {
             if (terms.get(i).getPower() != currPower) { // write down previous coefs
                 if (monNumber == 1) {
+                    if (builder.length() > 0 && terms.get(i - 1).isSign()) {
+                        builder.append('+');
+                    }
                     builder.append(terms.get(i - 1).toString(arg));
                 }
                 if (monNumber > 1) {
+                    if (builder.length() > 0) {
+                        builder.append('+');
+                    }
                     builder.append('(');
                     for (int j = i - monNumber; j < i; j++) {
                         builder.append(terms.get(j).coefsToString());
@@ -138,9 +144,15 @@ class Polynomial {
         }
         // append last element
         if (monNumber == 1) {
+            if (builder.length() > 0 && terms.get(terms.size() - 1).isSign()) {
+                builder.append('+');
+            }
             builder.append(terms.get(terms.size() - 1).toString(arg));
         }
         if (monNumber > 1) {
+            if (builder.length() > 0) {
+                builder.append('+');
+            }
             builder.append('(');
             for (int j = terms.size() - monNumber; j < terms.size(); j++) {
                 builder.append(terms.get(j).coefsToString());
@@ -222,5 +234,44 @@ class Polynomial {
         });
 
         terms = res;
+    }
+
+    @Deprecated
+    static Polynomial poweredBinomial(int power) {
+        int[] current = new int[1];
+        int[] next = new int[2];
+        current[0] = 1;
+        next[0] = 1;
+        next[1] = 1;
+        // coefficients of Pascal triangle
+        for (int i = 1; i < power; i++) {
+            current = next;
+            int size = current.length + 1;
+            next = new int[size];
+            for (int j = 0; j < size; j++) {
+                if (j == 0 || j == size - 1) {
+                    next[j] = 1;
+                } else {
+                    next[j] = current[j - 1] + current[j];
+                }
+            }
+        }
+
+        int polSize = next.length;
+        boolean positive = true;
+        int argPower = 0;
+        ArrayList<Monomial> terms = new ArrayList<>(polSize);
+        for (int i = 0; i < polSize; i++, argPower += 2, positive = !positive) {
+            Monomial m = new Monomial(1);
+            PrimeRoot coef = m.getCoefficients().peek();
+            coef.setNumber(next[i],2);
+            m.multByArg(argPower);
+            if (!positive) {
+                m = m.getAddInverse();
+            }
+            terms.add(m);
+        }
+
+        return new Polynomial(terms);
     }
 }

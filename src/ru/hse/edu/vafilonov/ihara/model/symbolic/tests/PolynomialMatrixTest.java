@@ -18,7 +18,8 @@ public class PolynomialMatrixTest {
         System.out.println(det.toString());
         det.reduce();
         System.out.println(det.toString());
-
-        Assert.assertEquals("kek", det.toString());
+        PolynomialFraction frac = PolynomialFraction.poweredBinomial(3);
+        System.out.println(frac);
+        Assert.assertEquals("\\frac{-\\sqrt{2}}{2\\cdot\\sqrt{3}}", det.toString());
     }
 }
