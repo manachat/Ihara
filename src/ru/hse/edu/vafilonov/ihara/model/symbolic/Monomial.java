@@ -137,9 +137,11 @@ public class Monomial {
         builder.append(coefs);
         if (power != 0) {
             builder.append(arg);
-            builder.append("^{");
-            builder.append(power);
-            builder.append('}');
+            if (power > 1) {
+                builder.append("^{");
+                builder.append(power);
+                builder.append('}');
+            }
         }
 
         return builder.toString();

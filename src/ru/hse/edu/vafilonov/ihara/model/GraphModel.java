@@ -408,13 +408,16 @@ public class GraphModel implements Serializable {
                         carcass[i][j] = PolynomialFraction.getAddId();
                         carcass[j][i] = PolynomialFraction.getAddId();
                     } else {
+                        String rawWeight = edge.getWeight();
+                        int start = rawWeight.indexOf('(');
+                        int end = rawWeight.indexOf(')');
+                        int root = Integer.parseInt(rawWeight.substring(start + 1, end));
                         if (graphNodes.get(i) == edge.getOrigin()) {
-                            String rawWeight = edge.getWeight();
-                            int start = rawWeight.indexOf('(');
-                            int end = rawWeight.indexOf(')');
-                            int root = Integer.parseInt(rawWeight.substring(start + 1, end));
                             carcass[i][j] = new PolynomialFraction(root, 1);
                             carcass[j][i] = new PolynomialFraction(1, root);
+                        } else {
+                            carcass[i][j] = new PolynomialFraction(1, root);
+                            carcass[j][i] = new PolynomialFraction(root, 1);
                         }
                     }
                 }
@@ -475,7 +478,7 @@ public class GraphModel implements Serializable {
                 if (i < half) { // row edge is primary
                     if (j < half) { //column edge is primary
                         res[i][j] = (graphEdges.get(i).getTail() == graphEdges.get(j).getOrigin())
-                                ? PolynomialFraction.getMultId() : PolynomialFraction.getMultId();
+                                ? PolynomialFraction.getMultId() : PolynomialFraction.getAddId();
                     } else { //column edge is inverse
                         res[i][j] = graphEdges.get(i).getTail() == graphEdges.get(j - half).getTail()
                                 ? PolynomialFraction.getMultId() : PolynomialFraction.getAddId();

@@ -69,6 +69,7 @@ public class PolynomialMatrix {
         for (int i = 0; i < size; i++){
             for (int j = 0; j < size; j++){
                 copy[i][j] = matrix[i][j].copy();
+                copy[i][j].reduce();
             }
         }
 
@@ -96,6 +97,8 @@ public class PolynomialMatrix {
                 PolynomialFraction coefficient = PolynomialFraction.multiply(copy[j][i], invLead); //c = m[j][i]/lead
                 addRow(copy, j, i, coefficient.getAddInverse()); // subtraction of row
             }
+            // новиночка
+            copy[i][i].reduce();
             det = PolynomialFraction.multiply(det, copy[i][i]);
         }
         if (swaps % 2 != 0){
@@ -116,6 +119,7 @@ public class PolynomialMatrix {
         for (int i = 0; i < size; i++){
             matrix[target][i] = PolynomialFraction.sum(matrix[target][i],
                     PolynomialFraction.multiply(matrix[source][i], coef));
+            matrix[target][i].reduce();
         }
     }
 

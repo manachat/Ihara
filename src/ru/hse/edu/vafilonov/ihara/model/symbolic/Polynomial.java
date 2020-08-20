@@ -95,7 +95,7 @@ class Polynomial {
 
     @Override
     public String toString() {
-        return toString('u');
+        return toString('x');
     }
 
     public String toString(char arg) {
